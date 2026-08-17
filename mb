@@ -1,0 +1,298 @@
+#!/usr/bin/env bash
+# mb — VPS security audit CLI.
+# Part of the 0x10debug VPS tool suite.
+#
+# Commands:
+#   mb audit run [--module LIST] [--quiet]   Run audit modules and generate report.
+#   mb audit status                          Show last audit date and summary.
+#   mb audit report                          Open latest HTML report (or show path).
+#   mb audit fix [--dry-run]                 Apply fixes for audit findings.
+#   mb audit schedule --daily                Set up daily cron audit.
+#   mb audit schedule --remove               Remove scheduled audit.
+#   mb audit baseline                        Create/update baseline snapshot.
+#   mb audit drift                           Check for config drift against baseline.
+#   mb audit update                          Update audit rules (git pull).
+#   mb audit help                            Show help.
+set -euo pipefail
+
+# Resolve the directory of this script.
+MB_SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shellcheck source=lib/common.sh
+source "${MB_SELF_DIR}/lib/common.sh"
+
+# All available modules (function name → script path).
+declare -A MB_MODULES=(
+    [cis-benchmark]="${MB_MODULES_DIR}/cis-benchmark.sh"
+    [lynis]="${MB_MODULES_DIR}/lynis.sh"
+    [log-audit]="${MB_MODULES_DIR}/log-audit.sh"
+    [container-scan]="${MB_MODULES_DIR}/container-scan.sh"
+    [drift]="${MB_MODULES_DIR}/drift.sh"
+)
+MB_ALL_MODULES="cis-benchmark,lynis,log-audit,container-scan,drift"
+
+# ---------------------------------------------------------------------------
+# Help
+# ---------------------------------------------------------------------------
+mb_audit_help() {
+    cat <<EOF
+${MB_COLOR_BOLD}mb${MB_COLOR_RESET} — VPS Security Audit (v${MB_AUDIT_VERSION})
+Part of the 0x10debug VPS tool suite.
+
+${MB_COLOR_BOLD}USAGE${MB_COLOR_RESET}
+  mb audit <command> [options]
+
+${MB_COLOR_BOLD}COMMANDS${MB_COLOR_RESET}
+  run [--module LIST] [--quiet]   Run audit modules and generate a report.
+                                  --module: comma-separated list from:
+                                    ${MB_ALL_MODULES}
+                                  --quiet: suppress terminal summary.
+  status                          Show last audit date and summary.
+  report                          Open latest HTML report in a browser,
+                                  or print the path if no browser is available.
+  fix [--dry-run]                 Apply fixes for all audit findings.
+                                  --dry-run: preview changes without applying.
+  schedule --daily                Set up a daily cron audit (default 03:15).
+  schedule --remove               Remove the scheduled audit.
+  baseline                        Create or update the baseline snapshot at
+                                  ${MB_BASELINE_FILE}.
+  drift                           Check for configuration drift against the
+                                  baseline snapshot.
+  update                          Update audit rules and scripts (git pull).
+  help                            Show this help.
+
+${MB_COLOR_BOLD}EXAMPLES${MB_COLOR_RESET}
+  sudo mb audit run
+  sudo mb audit run --module cis-benchmark,log-audit
+  sudo mb audit fix --dry-run
+  sudo mb audit schedule --daily
+  sudo mb audit baseline
+  mb audit drift
+
+${MB_COLOR_BOLD}REPORTS${MB_COLOR_RESET}
+  HTML: ${MB_AUDIT_REPORTS_DIR}/audit-latest.html
+  JSON: ${MB_AUDIT_REPORTS_DIR}/audit-latest.json
+
+${MB_COLOR_BOLD}DOCUMENTATION${MB_COLOR_RESET}
+  https://github.com/0x10debug/security-audit#readme
+
+EOF
+}
+
+# ---------------------------------------------------------------------------
+# mb audit run
+# ---------------------------------------------------------------------------
+mb_audit_run() {
+    local modules=""
+    local quiet=0
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --module) modules="$2"; shift 2 ;;
+            --quiet)  quiet=1; shift ;;
+            *) mb_error "Unknown option: $1"; exit 1 ;;
+        esac
+    done
+
+    [[ -z "$modules" ]] && modules="$MB_ALL_MODULES"
+
+    mb_ensure_dir "$MB_AUDIT_REPORTS_DIR"
+    local findings
+    findings="$(mktemp)"
+
+    IFS=',' read -ra mod_list <<< "$modules"
+    for mod in "${mod_list[@]}"; do
+        mod="${mod// }"
+        local script="${MB_MODULES[$mod]:-}"
+        if [[ -z "$script" ]]; then
+            mb_warn "Unknown module: $mod (skipping)"
+            continue
+        fi
+        if [[ ! -f "$script" ]]; then
+            mb_warn "Module script missing: $script (skipping)"
+            continue
+        fi
+        mb_info "Running module: ${mod}"
+        # Source the module so functions are available, then call its runner.
+        # shellcheck source=/dev/null
+        source "$script"
+        case "$mod" in
+            cis-benchmark)  cis_benchmark_run ;;
+            lynis)          mb_lynis_run ;;
+            log-audit)      log_audit_run ;;
+            container-scan) mb_container_scan ;;
+            drift)          mb_drift_run ;;
+        esac
+    done > "$findings" 2> >(grep -E '^(PASS|FAIL|WARN)\|' || true)
+
+    # Filter only valid finding lines (strip log noise).
+    local clean
+    clean="$(mktemp)"
+    grep -E '^(PASS|FAIL|WARN)\|' "$findings" > "$clean" || true
+
+    # Generate reports.
+    # shellcheck source=reports/report-generator.sh
+    source "${MB_REPORTS_DIR}/report-generator.sh"
+    if [[ "$quiet" -eq 1 ]]; then
+        mb_report_generate "$clean" >/dev/null
+    else
+        mb_report_generate "$clean"
+    fi
+
+    rm -f "$findings" "$clean"
+}
+
+# ---------------------------------------------------------------------------
+# mb audit status
+# ---------------------------------------------------------------------------
+mb_audit_status() {
+    local status_file="${MB_AUDIT_REPORTS_DIR}/status.txt"
+    if [[ ! -f "$status_file" ]]; then
+        printf '%bNo audit has been run yet.%b\n' "$MB_COLOR_YELLOW" "$MB_COLOR_RESET"
+        printf 'Run %bsudo mb audit run%b to perform an audit.\n' "$MB_COLOR_BOLD" "$MB_COLOR_RESET"
+        return
+    fi
+    printf '%bLast Audit Status%b\n' "$MB_COLOR_BOLD" "$MB_COLOR_RESET"
+    printf '──────────────────────────────\n'
+    while IFS='=' read -r key value; do
+        case "$key" in
+            last_run) printf '  Date:     %s\n' "$value" ;;
+            hostname) printf '  Host:     %s\n' "$value" ;;
+            total)    printf '  Total:    %s\n' "$value" ;;
+            pass)     printf '  %bPASS:%b   %s\n' "$MB_COLOR_GREEN"  "$MB_COLOR_RESET" "$value" ;;
+            fail)     printf '  %bFAIL:%b   %s\n' "$MB_COLOR_RED"    "$MB_COLOR_RESET" "$value" ;;
+            warn)     printf '  %bWARN:%b   %s\n' "$MB_COLOR_YELLOW" "$MB_COLOR_RESET" "$value" ;;
+            html)     printf '  Report:   %s\n' "$value" ;;
+        esac
+    done < "$status_file"
+    printf '──────────────────────────────\n'
+}
+
+# ---------------------------------------------------------------------------
+# mb audit report
+# ---------------------------------------------------------------------------
+mb_audit_report() {
+    local html="${MB_AUDIT_REPORTS_DIR}/audit-latest.html"
+    if [[ ! -f "$html" ]]; then
+        mb_warn "No report found. Run 'mb audit run' first."
+        return
+    fi
+    if mb_command_exists xdg-open; then
+        xdg-open "$html" >/dev/null 2>&1 || true
+    elif mb_command_exists open; then
+        open "$html" >/dev/null 2>&1 || true
+    else
+        printf 'Report available at: %s\n' "$html"
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# mb audit fix
+# ---------------------------------------------------------------------------
+mb_audit_fix() {
+    local dry_run=0
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run) dry_run=1; shift ;;
+            *) mb_error "Unknown option: $1"; exit 1 ;;
+        esac
+    done
+
+    mb_require_root
+
+    local flag=""
+    [[ "$dry_run" -eq 1 ]] && flag="--dry-run"
+
+    # Run all fix scripts.
+    for fix in "${MB_FIXES_DIR}"/fix-*.sh; do
+        [[ -f "$fix" ]] || continue
+        mb_info "Applying fixes from $(basename "$fix")"
+        bash "$fix" $flag --all || true
+    done
+    mb_ok "Fix pass complete."
+}
+
+# ---------------------------------------------------------------------------
+# mb audit schedule
+# ---------------------------------------------------------------------------
+mb_audit_schedule() {
+    # shellcheck source=lib/schedule.sh
+    source "${MB_SELF_DIR}/lib/schedule.sh"
+    case "${1:-}" in
+        --daily)  shift; mb_schedule_daily "$@" ;;
+        --remove) mb_schedule_remove ;;
+        "")       mb_schedule_status ;;
+        *)        mb_error "Unknown schedule option: $1"; exit 1 ;;
+    esac
+}
+
+# ---------------------------------------------------------------------------
+# mb audit baseline
+# ---------------------------------------------------------------------------
+mb_audit_baseline() {
+    # shellcheck source=baseline/compare.sh
+    source "${MB_BASELINE_DIR}/compare.sh"
+    mb_baseline_create
+}
+
+# ---------------------------------------------------------------------------
+# mb audit drift
+# ---------------------------------------------------------------------------
+mb_audit_drift() {
+    # shellcheck source=baseline/compare.sh
+    source "${MB_BASELINE_DIR}/compare.sh"
+    mb_baseline_compare
+}
+
+# ---------------------------------------------------------------------------
+# mb audit update
+# ---------------------------------------------------------------------------
+mb_audit_update() {
+    if ! mb_command_exists git; then
+        mb_error "git is required to update."
+        exit 1
+    fi
+    if [[ ! -d "${MB_SELF_DIR}/.git" ]]; then
+        mb_error "Not a git repository — cannot update. Clone from https://github.com/0x10debug/security-audit"
+        exit 1
+    fi
+    mb_info "Pulling latest audit rules and scripts..."
+    git -C "$MB_SELF_DIR" pull --ff-only
+    mb_ok "Updated."
+}
+
+# ---------------------------------------------------------------------------
+# Dispatcher
+# ---------------------------------------------------------------------------
+main() {
+    if [[ $# -lt 1 ]]; then
+        mb_audit_help
+        exit 0
+    fi
+
+    # Top-level keyword is "audit".
+    if [[ "$1" != "audit" ]]; then
+        mb_error "Unknown command: $1"
+        mb_audit_help
+        exit 1
+    fi
+    shift
+
+    local sub="${1:-help}"
+    shift || true
+
+    case "$sub" in
+        run)       mb_audit_run "$@" ;;
+        status)    mb_audit_status ;;
+        report)    mb_audit_report ;;
+        fix)       mb_audit_fix "$@" ;;
+        schedule)  mb_audit_schedule "$@" ;;
+        baseline)  mb_audit_baseline ;;
+        drift)     mb_audit_drift ;;
+        update)    mb_audit_update ;;
+        help|-h|--help) mb_audit_help ;;
+        *)         mb_error "Unknown subcommand: $sub"; mb_audit_help; exit 1 ;;
+    esac
+}
+
+main "$@"

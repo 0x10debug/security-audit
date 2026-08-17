@@ -1,0 +1,33 @@
+# Dev docs (working notes, not for distribution)
+dev-docs/
+AGENTS.md
+
+# Numbered dev-docs
+dev-docs-*.md
+dev-docs-*/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.sublime-*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Audit reports (generated at runtime, do not commit)
+reports/output/
+*.audit.html
+*.audit.json
+
+# Baseline snapshots (generated at runtime)
+baseline/baseline.yaml

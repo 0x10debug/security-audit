@@ -1,0 +1,17 @@
+# cis-ssh.rules — expected SSH daemon configuration (CIS Benchmark aligned).
+# Format: key=value. Values are matched against sshd_config directives.
+# Edit these to match your environment, then run `mb audit run`.
+
+PermitRootLogin=no
+PasswordAuthentication=no
+Port=2222
+AllowUsers=*
+MaxAuthTries=3
+LoginGraceTime=30
+PubkeyAuthentication=yes
+X11Forwarding=no
+AllowTcpForwarding=no
+ClientAliveInterval=300
+ClientAliveCountMax=0
+PermitEmptyPasswords=no
+Protocol=2

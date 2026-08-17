@@ -1,0 +1,10 @@
+# cis-firewall.rules — expected firewall configuration (CIS Benchmark aligned).
+# Format: key=value. Comma-separated values are lists.
+# Supported keys depend on which firewall is active (ufw / nftables / iptables).
+
+DefaultIncomingPolicy=deny
+DefaultOutgoingPolicy=allow
+DefaultForwardingPolicy=deny
+AllowedPorts=22,80,443
+AllowedPortsUDP=
+RateLimitSSH=true

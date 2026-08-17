@@ -1,0 +1,19 @@
+# cis-kernel.rules — expected sysctl network and kernel hardening parameters.
+# Format: key=value, where key is a sysctl path.
+# Values are compared against `sysctl -n <key>` output.
+
+net.ipv4.tcp_congestion_control=bbr
+fs.file-max=1048576
+net.core.somaxconn=4096
+net.ipv4.tcp_syncookies=1
+net.ipv4.tcp_max_syn_backlog=4096
+net.ipv4.ip_forward=0
+net.ipv4.conf.all.send_redirects=0
+net.ipv4.conf.default.send_redirects=0
+net.ipv4.conf.all.accept_redirects=0
+net.ipv4.conf.default.accept_redirects=0
+net.ipv4.conf.all.accept_source_route=0
+net.ipv4.conf.default.accept_source_route=0
+net.ipv4.icmp_echo_ignore_broadcasts=1
+net.ipv4.tcp_timestamps=1
+kernel.sysrq=0

@@ -1,0 +1,19 @@
+# custom.rules.example — template for user-defined audit checks.
+#
+# Copy this file to custom.rules and edit it. `mb audit run` will pick up
+# custom.rules automatically and run any check_<key> function defined in
+# modules/cis-benchmark.sh that matches a key below.
+#
+# Format:
+#   <key>=<expected_value>
+#
+# Keys are free-form. Each key is matched against the output of a function
+# named `check_custom_<key>` (case-insensitive). If no matching function
+# exists, the key is reported as WARN with a hint to define the function.
+#
+# Example entries (uncomment and edit):
+
+# MyServiceRunning=yes
+# MyServiceEnabled=yes
+# DataDirPerms=750
+# CustomBannerSet=yes

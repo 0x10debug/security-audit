@@ -1,0 +1,11 @@
+# cis-docker.rules — expected Docker daemon configuration (CIS Docker Benchmark aligned).
+# Format: key=value.
+
+ExposedDaemon=false
+LogRotation=true
+LogMaxSize=10m
+LogMaxFile=3
+UserNamespace=false
+LiveRestore=true
+IpcMode=private
+NoNewPrivileges=true
