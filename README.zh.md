@@ -11,7 +11,9 @@
 | 模块 | 检查内容 | 附带修复命令 |
 |---|---|---|
 | `cis-benchmark` | SSH 加固、防火墙默认策略、内核 sysctl 参数、Docker daemon 配置、自动更新 | 是 |
+| `cis-v14` | CIS Benchmark v14.0 检查（与 cis-benchmark 相同，显式指定 v14.0 运行的别名） | 是 |
 | `lynis` | 通过 Lynis 进行全系统加固扫描（缺失时自动安装） | Lynis 建议 |
+| `lynis-score` | Lynis CIS 合规评分 — 运行 Lynis，将结果映射到 CIS v14.0 控制项，生成 0–100 合规评分及按章节分组的报告（TXT + JSON） | 是 |
 | `log-audit` | SSH 失败登录、来自新 IP 的成功登录、sudo 事件、用户增删、crontab 修改、敏感文件 mtime 完整性 | 是 |
 | `container-scan` | 用 Trivy 扫描所有运行中 Docker 镜像，按 Critical/High/Medium/Low 分组 | 是 |
 | `drift` | 将当前 SSH、防火墙、内核、Docker 状态与基线快照对比 | 是 |
@@ -53,6 +55,41 @@ sudo ./mb audit fix
 
 ```bash
 sudo ./mb audit run --module cis-benchmark,log-audit
+```
+
+### 运行 CIS v14.0 合规评分
+
+```bash
+# 运行基于 Lynis 的 CIS v14.0 合规评分模块
+sudo ./mb audit run --module lynis-score
+
+# 评分报告保存到：
+#   /var/log/mb-audit/reports/cis-score-latest.txt
+#   /var/log/mb-audit/reports/cis-score-latest.json
+```
+
+评分模块运行 Lynis，将结果映射到完整的 CIS Benchmark v14.0 控制项集
+（6 个章节、300+ 控制项），生成加权合规评分（0–100）及按章节分组的报告。
+完整的控制项→修复脚本映射见
+[`docs/cis-v14.0-mapping.md`](docs/cis-v14.0-mapping.md)。
+
+### 应用 CIS v14.0 修复脚本
+
+```bash
+# SSH 加固（CIS v14.0 第 5.1 节）
+sudo fixes/cis-ssh-hardening.sh --all
+
+# 内核与网络加固（CIS v14.0 第 3.1/3.2/1.6 节）
+sudo fixes/cis-kernel-hardening.sh --all
+
+# 防火墙配置（CIS v14.0 第 3.4 节）
+sudo fixes/cis-firewall-setup.sh --all
+
+# 文件权限与系统维护（CIS v14.0 第 1.1/6.1/6.2 节）
+sudo fixes/cis-permissions-fix.sh --all
+
+# 预览修复内容但不实际执行
+sudo fixes/cis-ssh-hardening.sh --all --dry-run
 ```
 
 ### 创建基线快照
@@ -126,6 +163,7 @@ Lynis 只是其中一个模块。本工具还做日志分析、容器 CVE 扫描
 
 - [审计指南](docs/audit-guide.md) — 如何运行审计并解读报告
 - [CIS Benchmark](docs/cis-benchmark.md) — 检查了哪些控制项及原因
+- [CIS v14.0 映射](docs/cis-v14.0-mapping.md) — 完整的 CIS v14.0 控制项→审计规则→修复脚本映射及评分方法说明
 - [漂移检测](docs/drift-detection.md) — 漂移检测的工作原理与意义
 - [自定义规则](docs/custom-rules.md) — 如何编写自定义审计规则
 

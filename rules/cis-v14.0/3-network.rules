@@ -1,0 +1,61 @@
+# 3-network.rules — CIS Benchmark v14.0, section 3: Network Parameters.
+# Covers kernel network parameters, IPv6, TCP wrappers, and firewall.
+#
+# Format: <control_id>|<key>|<expected>|<severity>|<fix_script>
+
+# Section 3.1 — Network parameters (host only)
+3.1.1|net_ipv4_ip_forward|0|medium|fixes/cis-kernel-hardening.sh --ip-forward
+3.1.2|net_ipv6_conf_all_forwarding|0|medium|fixes/cis-kernel-hardening.sh --ipv6-forward
+3.1.3|net_ipv4_conf_all_send_redirects|0|medium|fixes/cis-kernel-hardening.sh --send-redirects
+3.1.4|net_ipv4_conf_default_send_redirects|0|medium|fixes/cis-kernel-hardening.sh --send-redirects
+3.1.5|net_ipv4_conf_all_accept_redirects|0|medium|fixes/cis-kernel-hardening.sh --accept-redirects
+3.1.6|net_ipv4_conf_default_accept_redirects|0|medium|fixes/cis-kernel-hardening.sh --accept-redirects
+3.1.7|net_ipv4_conf_all_secure_redirects|0|medium|fixes/cis-kernel-hardening.sh --secure-redirects
+3.1.8|net_ipv4_conf_default_secure_redirects|0|medium|fixes/cis-kernel-hardening.sh --secure-redirects
+3.1.9|net_ipv4_conf_all_log_martians|1|low|fixes/cis-kernel-hardening.sh --log-martians
+3.1.10|net_ipv4_conf_default_log_martians|1|low|fixes/cis-kernel-hardening.sh --log-martians
+3.1.11|net_ipv4_conf_all_accept_source_route|0|medium|fixes/cis-kernel-hardening.sh --source-route
+3.1.12|net_ipv4_conf_default_accept_source_route|0|medium|fixes/cis-kernel-hardening.sh --source-route
+3.1.13|net_ipv4_conf_all_rp_filter|1|medium|fixes/cis-kernel-hardening.sh --rp-filter
+3.1.14|net_ipv4_conf_default_rp_filter|1|medium|fixes/cis-kernel-hardening.sh --rp-filter
+3.1.15|net_ipv4_icmp_echo_ignore_broadcasts|1|medium|fixes/cis-kernel-hardening.sh --icmp-broadcast
+3.1.16|net_ipv4_icmp_ignore_bogus_responses|1|low|fixes/cis-kernel-hardening.sh --icmp-bogus
+3.1.17|net_ipv4_tcp_syncookies|1|high|fixes/cis-kernel-hardening.sh --syncookies
+3.1.18|net_ipv4_tcp_max_syn_backlog|4096|medium|fixes/cis-kernel-hardening.sh --syn-backlog
+3.1.19|net_ipv4_tcp_rfc1337|1|low|fixes/cis-kernel-hardening.sh --rfc1337
+3.1.20|net_ipv4_tcp_max_orphans|32768|low|fixes/cis-kernel-hardening.sh --tcp-orphans
+3.1.21|net_ipv4_tcp_fin_timeout|15|low|fixes/cis-kernel-hardening.sh --tcp-fin-timeout
+3.1.22|net_ipv4_tcp_keepalive_time|300|low|fixes/cis-kernel-hardening.sh --tcp-keepalive-time
+3.1.23|net_ipv4_tcp_keepalive_probes|5|low|fixes/cis-kernel-hardening.sh --tcp-keepalive-probes
+3.1.24|net_ipv4_tcp_keepalive_intvl|10|low|fixes/cis-kernel-hardening.sh --tcp-keepalive-intvl
+
+# Section 3.2 — IPv6
+3.2.1|net_ipv6_conf_all_disable_ipv6|0|low|fixes/cis-kernel-hardening.sh --ipv6-disable
+3.2.2|net_ipv6_conf_default_disable_ipv6|0|low|fixes/cis-kernel-hardening.sh --ipv6-disable
+3.2.3|net_ipv6_conf_all_accept_ra|0|medium|fixes/cis-kernel-hardening.sh --ipv6-ra
+3.2.4|net_ipv6_conf_default_accept_ra|0|medium|fixes/cis-kernel-hardening.sh --ipv6-ra
+3.2.5|net_ipv6_conf_all_accept_redirects|0|medium|fixes/cis-kernel-hardening.sh --ipv6-redirects
+3.2.6|net_ipv6_conf_default_accept_redirects|0|medium|fixes/cis-kernel-hardening.sh --ipv6-redirects
+3.2.7|net_ipv6_conf_all_accept_source_route|0|medium|fixes/cis-kernel-hardening.sh --ipv6-source-route
+3.2.8|net_ipv6_conf_default_accept_source_route|0|medium|fixes/cis-kernel-hardening.sh --ipv6-source-route
+
+# Section 3.3 — TCP Wrappers (legacy, mostly deprecated)
+3.3.1|tcp_wrappers_installed|yes|low|fixes/cis-permissions-fix.sh --install-tcp-wrappers
+3.3.2|hosts_allow_configured|yes|low|fixes/cis-permissions-fix.sh --hosts-allow
+3.3.3|hosts_deny_configured|yes|low|fixes/cis-permissions-fix.sh --hosts-deny
+3.3.4|hosts_allow_perm|644|low|fixes/cis-permissions-fix.sh --hosts-allow-perm
+3.3.5|hosts_allow_owner|root|low|fixes/cis-permissions-fix.sh --hosts-allow-owner
+3.3.6|hosts_deny_perm|644|low|fixes/cis-permissions-fix.sh --hosts-deny-perm
+3.3.7|hosts_deny_owner|root|low|fixes/cis-permissions-fix.sh --hosts-deny-owner
+
+# Section 3.4 — Firewall configuration
+3.4.1|firewall_installed|yes|high|fixes/cis-firewall-setup.sh --install
+3.4.2|firewall_enabled|yes|high|fixes/cis-firewall-setup.sh --enable
+3.4.3|firewall_default_incoming|deny|high|fixes/cis-firewall-setup.sh --default-incoming
+3.4.4|firewall_default_outgoing|allow|medium|fixes/cis-firewall-setup.sh --default-outgoing
+3.4.5|firewall_default_forwarding|deny|medium|fixes/cis-firewall-setup.sh --default-forwarding
+3.4.6|firewall_loopback_allowed|yes|low|fixes/cis-firewall-setup.sh --loopback
+3.4.7|firewall_allowed_ports|22,80,443|medium|fixes/cis-firewall-setup.sh --allowed-ports
+3.4.8|firewall_rate_limit_ssh|yes|medium|fixes/cis-firewall-setup.sh --rate-limit-ssh
+3.4.9|firewall_logging|yes|low|fixes/cis-firewall-setup.sh --logging
+3.4.10|firewall_ipv6_enabled|yes|medium|fixes/cis-firewall-setup.sh --ipv6

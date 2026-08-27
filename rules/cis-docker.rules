@@ -1,5 +1,6 @@
-# cis-docker.rules — expected Docker daemon configuration (CIS Docker Benchmark aligned).
+# cis-docker.rules — expected Docker daemon configuration (CIS Docker Benchmark v14.0 aligned).
 # Format: key=value.
+# Full v14.0 control mapping: see docs/cis-v14.0-mapping.md.
 
 ExposedDaemon=false
 LogRotation=true
@@ -9,3 +10,9 @@ UserNamespace=false
 LiveRestore=true
 IpcMode=private
 NoNewPrivileges=true
+# CIS v14.0 additions:
+ContentTrust=true
+UserlandProxy=false
+AuthorizationPlugins=
+DefaultUlimits=nofile=65535:65535
+SelinuxEnabled=false

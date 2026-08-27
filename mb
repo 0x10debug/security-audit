@@ -24,12 +24,14 @@ source "${MB_SELF_DIR}/lib/common.sh"
 # All available modules (function name → script path).
 declare -A MB_MODULES=(
     [cis-benchmark]="${MB_MODULES_DIR}/cis-benchmark.sh"
+    [cis-v14]="${MB_MODULES_DIR}/cis-benchmark.sh"
     [lynis]="${MB_MODULES_DIR}/lynis.sh"
+    [lynis-score]="${MB_MODULES_DIR}/lynis-scoring.sh"
     [log-audit]="${MB_MODULES_DIR}/log-audit.sh"
     [container-scan]="${MB_MODULES_DIR}/container-scan.sh"
     [drift]="${MB_MODULES_DIR}/drift.sh"
 )
-MB_ALL_MODULES="cis-benchmark,lynis,log-audit,container-scan,drift"
+MB_ALL_MODULES="cis-benchmark,cis-v14,lynis,lynis-score,log-audit,container-scan,drift"
 
 # ---------------------------------------------------------------------------
 # Help
@@ -47,6 +49,8 @@ ${MB_COLOR_BOLD}COMMANDS${MB_COLOR_RESET}
                                   --module: comma-separated list from:
                                     ${MB_ALL_MODULES}
                                   --quiet: suppress terminal summary.
+                                  cis-v14:        CIS Benchmark v14.0 checks.
+                                  lynis-score:    Lynis CIS compliance scoring.
   status                          Show last audit date and summary.
   report                          Open latest HTML report in a browser,
                                   or print the path if no browser is available.
@@ -118,7 +122,9 @@ mb_audit_run() {
         source "$script"
         case "$mod" in
             cis-benchmark)  cis_benchmark_run ;;
+            cis-v14)        cis_benchmark_run ;;
             lynis)          mb_lynis_run ;;
+            lynis-score)    mb_lynis_scoring_run ;;
             log-audit)      log_audit_run ;;
             container-scan) mb_container_scan ;;
             drift)          mb_drift_run ;;
@@ -203,8 +209,8 @@ mb_audit_fix() {
     local flag=""
     [[ "$dry_run" -eq 1 ]] && flag="--dry-run"
 
-    # Run all fix scripts.
-    for fix in "${MB_FIXES_DIR}"/fix-*.sh; do
+    # Run all fix scripts (both legacy fix-*.sh and CIS v14.0 cis-*.sh).
+    for fix in "${MB_FIXES_DIR}"/fix-*.sh "${MB_FIXES_DIR}"/cis-*.sh; do
         [[ -f "$fix" ]] || continue
         mb_info "Applying fixes from $(basename "$fix")"
         bash "$fix" $flag --all || true

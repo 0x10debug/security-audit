@@ -1,6 +1,7 @@
-# cis-firewall.rules — expected firewall configuration (CIS Benchmark aligned).
+# cis-firewall.rules — expected firewall configuration (CIS Benchmark v14.0 aligned).
 # Format: key=value. Comma-separated values are lists.
 # Supported keys depend on which firewall is active (ufw / nftables / iptables).
+# Full v14.0 control mapping: see rules/cis-v14.0/3-network.rules (section 3.4).
 
 DefaultIncomingPolicy=deny
 DefaultOutgoingPolicy=allow
@@ -8,3 +9,10 @@ DefaultForwardingPolicy=deny
 AllowedPorts=22,80,443
 AllowedPortsUDP=
 RateLimitSSH=true
+# CIS v14.0 additions (section 3.4):
+LoopbackAllowed=yes
+IPv6Enabled=yes
+LoggingEnabled=yes
+# Rate limit parameters for SSH (CIS v14.0 3.4.8):
+RateLimitSSHRate=6
+RateLimitSSHWindow=30

@@ -1,0 +1,71 @@
+# 2-services.rules — CIS Benchmark v14.0, section 2: Services.
+# Covers inetd, special purpose services (HTTP/FTP/SMB/DHCP/NNTP/RSYNC/TFTP),
+# mail clients, LDAP, NFS, DNS, and time service.
+#
+# Format: <control_id>|<key>|<expected>|<severity>|<fix_script>
+
+# Section 2.1 — inetd services (legacy, mostly disabled on modern systems)
+2.1.1|inetd_installed|not_installed|low|fixes/cis-permissions-fix.sh --remove-inetd
+2.1.2|inetd_services|none|low|fixes/cis-permissions-fix.sh --disable-inetd-services
+2.1.3|inetd_xinetd_installed|not_installed|low|fixes/cis-permissions-fix.sh --remove-xinetd
+
+# Section 2.2 — Special purpose services
+2.2.1|time_sync_daemon|single|low|fixes/cis-permissions-fix.sh --single-timesync
+2.2.2|xwindow_system|not_installed|low|fixes/cis-permissions-fix.sh --remove-x11
+2.2.3|avahi_daemon|disabled|low|fixes/cis-permissions-fix.sh --disable-avahi
+2.2.4|cups|disabled|low|fixes/cis-permissions-fix.sh --disable-cups
+2.2.5|dhcp_server|disabled|medium|fixes/cis-permissions-fix.sh --disable-dhcp
+2.2.6|dhcp_client|single|low|fixes/cis-permissions-fix.sh --single-dhcp
+2.2.7|ldap_server|disabled|medium|fixes/cis-permissions-fix.sh --disable-ldap
+2.2.8|ldap_client|not_installed|low|fixes/cis-permissions-fix.sh --remove-ldap-client
+2.2.9|nfs_server|disabled|medium|fixes/cis-permissions-fix.sh --disable-nfs
+2.2.10|nfs_client|disabled|medium|fixes/cis-permissions-fix.sh --disable-nfs-client
+2.2.11|dns_server|disabled|medium|fixes/cis-permissions-fix.sh --disable-dns
+2.2.12|ftp_server|disabled|medium|fixes/cis-permissions-fix.sh --disable-ftp
+2.2.13|http_server|disabled|medium|fixes/cis-permissions-fix.sh --disable-http
+2.2.14|imap_pop_server|disabled|medium|fixes/cis-permissions-fix.sh --disable-imap
+2.2.15|samba_server|disabled|medium|fixes/cis-permissions-fix.sh --disable-samba
+2.2.16|http_proxy_server|disabled|medium|fixes/cis-permissions-fix.sh --disable-proxy
+2.2.17|snmp_server|disabled|medium|fixes/cis-permissions-fix.sh --disable-snmp
+2.2.18|rsync_service|disabled|medium|fixes/cis-permissions-fix.sh --disable-rsync
+2.2.19|nis_server|disabled|medium|fixes/cis-permissions-fix.sh --disable-nis
+2.2.20|nis_client|not_installed|low|fixes/cis-permissions-fix.sh --remove-nis-client
+
+# Section 2.3 — Service clients
+2.3.1|nis_client_installed|not_installed|low|fixes/cis-permissions-fix.sh --remove-nis-client
+2.3.2|rsh_client|not_installed|low|fixes/cis-permissions-fix.sh --remove-rsh
+2.3.3|talk_client|not_installed|low|fixes/cis-permissions-fix.sh --remove-talk
+2.3.4|telnet_client|not_installed|low|fixes/cis-permissions-fix.sh --remove-telnet
+2.3.5|ldap_client_installed|not_installed|low|fixes/cis-permissions-fix.sh --remove-ldap-client
+2.3.6|ftp_client|not_installed|low|fixes/cis-permissions-fix.sh --remove-ftp-client
+
+# Section 2.4 — Time service (ntp/chrony)
+2.4.1|ntp_installed|yes|low|fixes/cis-permissions-fix.sh --install-ntp
+2.4.2|ntp_enabled|yes|low|fixes/cis-permissions-fix.sh --enable-ntp
+2.4.3|ntp_running|yes|low|fixes/cis-permissions-fix.sh --enable-ntp
+2.4.4|ntp_configured|yes|medium|fixes/cis-permissions-fix.sh --configure-ntp
+2.4.5|ntp_restrict|yes|medium|fixes/cis-permissions-fix.sh --ntp-restrict
+2.4.6|ntp_log_perm|644|low|fixes/cis-permissions-fix.sh --ntp-log-perm
+2.4.7|ntp_log_owner|root|low|fixes/cis-permissions-fix.sh --ntp-log-owner
+
+# Section 2.5 — Mail client
+2.5.1|mail_client_installed|yes|low|fixes/cis-permissions-fix.sh --install-mail-client
+2.5.2|mail_client_configured|yes|low|fixes/cis-permissions-fix.sh --configure-mail-client
+2.5.3|mail_client_alias|yes|low|fixes/cis-permissions-fix.sh --mail-alias
+
+# Section 2.6 — LDAP (if used)
+2.6.1|ldap_tls_required|yes|high|fixes/cis-permissions-fix.sh --ldap-tls
+2.6.2|ldap_tls_cert|yes|high|fixes/cis-permissions-fix.sh --ldap-cert
+2.6.3|ldap_bind_dn|yes|medium|fixes/cis-permissions-fix.sh --ldap-bind
+
+# Section 2.7 — NFS (if used)
+2.7.1|nfs_rpcbind|restricted|medium|fixes/cis-permissions-fix.sh --nfs-rpcbind
+2.7.2|nfs_exports|reviewed|medium|
+2.7.3|nfs_no_root_squash|no|high|fixes/cis-permissions-fix.sh --nfs-root-squash
+2.7.4|nfs_secure|yes|medium|fixes/cis-permissions-fix.sh --nfs-secure
+
+# Section 2.8 — DNS (if used)
+2.8.1|dns_recursion|no|high|fixes/cis-permissions-fix.sh --dns-recursion
+2.8.2|dns_version|hidden|medium|fixes/cis-permissions-fix.sh --dns-version
+2.8.3|dns_acl|yes|medium|fixes/cis-permissions-fix.sh --dns-acl
+2.8.4|dns_zone_xfer|restricted|medium|fixes/cis-permissions-fix.sh --dns-zonexfer

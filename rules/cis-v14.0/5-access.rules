@@ -1,0 +1,118 @@
+# 5-access.rules — CIS Benchmark v14.0, section 5: Access, Authentication and Authorization.
+# Covers SSH server config, PAM, password policies, user accounts, and session lock.
+#
+# Format: <control_id>|<key>|<expected>|<severity>|<fix_script>
+
+# Section 5.1 — SSH server configuration
+5.1.1|ssh_permitrootlogin|no|high|fixes/cis-ssh-hardening.sh --permit-root-login
+5.1.2|ssh_permitemptypasswords|no|high|fixes/cis-ssh-hardening.sh --permit-empty-passwords
+5.1.3|ssh_permittunnel|no|medium|fixes/cis-ssh-hardening.sh --permit-tunnel
+5.1.4|ssh_sshd_protocol|2|high|fixes/cis-ssh-hardening.sh --protocol
+5.1.5|ssh_x11forwarding|no|medium|fixes/cis-ssh-hardening.sh --x11-forwarding
+5.1.6|ssh_maxauthtries|3|medium|fixes/cis-ssh-hardening.sh --max-auth-tries
+5.1.7|ssh_logingracetime|30|medium|fixes/cis-ssh-hardening.sh --login-grace-time
+5.1.8|ssh_ciphers|strong|high|fixes/cis-ssh-hardening.sh --ciphers
+5.1.9|ssh_macs|strong|high|fixes/cis-ssh-hardening.sh --macs
+5.1.10|ssh_kexalgorithms|strong|high|fixes/cis-ssh-hardening.sh --kex-algorithms
+5.1.11|ssh_clientaliveinterval|300|low|fixes/cis-ssh-hardening.sh --client-alive-interval
+5.1.12|ssh_clientalivecountmax|0|low|fixes/cis-ssh-hardening.sh --client-alive-countmax
+5.1.13|ssh_loglevel|verbose|low|fixes/cis-ssh-hardening.sh --log-level
+5.1.14|ssh_ignoreknownhosts|no|low|fixes/cis-ssh-hardening.sh --ignore-known-hosts
+5.1.15|ssh_gssapiauthentication|no|low|fixes/cis-ssh-hardening.sh --gssapi
+5.1.16|ssh_kerberosauthentication|no|low|fixes/cis-ssh-hardening.sh --kerberos
+5.1.17|ssh_strictmodes|yes|medium|fixes/cis-ssh-hardening.sh --strict-modes
+5.1.18|ssh_allowusers|set|medium|fixes/cis-ssh-hardening.sh --allow-users
+5.1.19|ssh_allowgroups|set|medium|fixes/cis-ssh-hardening.sh --allow-groups
+5.1.20|ssh_denyusers|reviewed|low|
+5.1.21|ssh_denygroups|reviewed|low|
+5.1.22|ssh_passwordauthentication|no|high|fixes/cis-ssh-hardening.sh --password-auth
+5.1.23|ssh_pubkeyauthentication|yes|medium|fixes/cis-ssh-hardening.sh --pubkey-auth
+5.1.24|ssh_hostbasedauthentication|no|medium|fixes/cis-ssh-hardening.sh --hostbased-auth
+5.1.25|ssh_permittcpforwarding|no|medium|fixes/cis-ssh-hardening.sh --permit-tcp-forwarding
+5.1.26|ssh_permitagentforwarding|no|medium|fixes/cis-ssh-hardening.sh --permit-agent-forwarding
+5.1.27|ssh_port|2222|medium|fixes/cis-ssh-hardening.sh --port
+5.1.28|ssh_banner|yes|low|fixes/cis-ssh-hardening.sh --banner
+5.1.29|ssh_maxstartups|10:30:60|low|fixes/cis-ssh-hardening.sh --max-startups
+5.1.30|ssh_maxsessions|10|low|fixes/cis-ssh-hardening.sh --max-sessions
+5.1.31|ssh_logingraceshorts|30|medium|fixes/cis-ssh-hardening.sh --login-grace-time
+5.1.32|ssh_compression|no|low|fixes/cis-ssh-hardening.sh --compression
+5.1.33|ssh_hostkey_algos|strong|high|fixes/cis-ssh-hardening.sh --hostkey-algos
+5.1.34|ssh_hostbasedacceptedkeytypes|strong|medium|fixes/cis-ssh-hardening.sh --hostbased-keytypes
+
+# Section 5.2 — PAM configuration
+5.2.1|pam_libs_installed|yes|medium|fixes/cis-permissions-fix.sh --install-pam
+5.2.2|pam_common_password|configured|high|fixes/cis-permissions-fix.sh --pam-password
+5.2.3|pam_common_auth|configured|high|fixes/cis-permissions-fix.sh --pam-auth
+5.2.4|pam_common_account|configured|medium|fixes/cis-permissions-fix.sh --pam-account
+5.2.5|pam_common_session|configured|medium|fixes/cis-permissions-fix.sh --pam-session
+5.2.6|pam_faillock|yes|high|fixes/cis-permissions-fix.sh --pam-faillock
+5.2.7|pam_faillock_deny|5|high|fixes/cis-permissions-fix.sh --pam-faillock-deny
+5.2.8|pam_faillock_unlock_time|900|high|fixes/cis-permissions-fix.sh --pam-faillock-unlock
+5.2.9|pam_pwhistory|yes|medium|fixes/cis-permissions-fix.sh --pam-pwhistory
+5.2.10|pam_pwhistory_remember|5|medium|fixes/cis-permissions-fix.sh --pam-pwhistory-remember
+5.2.11|pam_no_root_auth|configured|medium|fixes/cis-permissions-fix.sh --pam-no-root-auth
+
+# Section 5.3 — Password policies
+5.3.1|pass_max_days|60|medium|fixes/cis-permissions-fix.sh --pass-max-days
+5.3.2|pass_min_days|1|medium|fixes/cis-permissions-fix.sh --pass-min-days
+5.3.3|pass_warn_age|7|low|fixes/cis-permissions-fix.sh --pass-warn-age
+5.3.4|pass_inactive_lock|30|medium|fixes/cis-permissions-fix.sh --pass-inactive-lock
+5.3.5|pass_min_len|14|high|fixes/cis-permissions-fix.sh --pass-min-len
+5.3.6|pass_complexity|yes|high|fixes/cis-permissions-fix.sh --pass-complexity
+5.3.7|pass_dcredit|-1|medium|fixes/cis-permissions-fix.sh --pass-dcredit
+5.3.8|pass_ucredit|-1|medium|fixes/cis-permissions-fix.sh --pass-ucredit
+5.3.9|pass_lcredit|-1|medium|fixes/cis-permissions-fix.sh --pass-lcredit
+5.3.10|pass_ocredit|-1|medium|fixes/cis-permissions-fix.sh --pass-ocredit
+5.3.11|pass_minclass|4|medium|fixes/cis-permissions-fix.sh --pass-minclass
+5.3.12|pass_maxrepeat|3|medium|fixes/cis-permissions-fix.sh --pass-maxrepeat
+5.3.13|pass_maxclassrepeat|4|medium|fixes/cis-permissions-fix.sh --pass-maxclassrepeat
+5.3.14|pass_gecoscheck|yes|low|fixes/cis-permissions-fix.sh --pass-gecoscheck
+5.3.15|pass_dictcheck|yes|medium|fixes/cis-permissions-fix.sh --pass-dictcheck
+5.3.16|pass_enforce_for_root|yes|high|fixes/cis-permissions-fix.sh --pass-enforce-root
+5.3.17|pass_maxsequence|yes|medium|fixes/cis-permissions-fix.sh --pass-maxsequence
+5.3.18|pass_retry|3|low|fixes/cis-permissions-fix.sh --pass-retry
+5.3.19|pass_sha512|yes|medium|fixes/cis-permissions-fix.sh --pass-sha512
+
+# Section 5.4 — User accounts and environment
+5.4.1|root_gid_zero|0|high|fixes/cis-permissions-fix.sh --root-gid
+5.4.2|root_shell|set|medium|fixes/cis-permissions-fix.sh --root-shell
+5.4.3|root_path|clean|medium|fixes/cis-permissions-fix.sh --root-path
+5.4.4|root_home_perm|700|medium|fixes/cis-permissions-fix.sh --root-home-perm
+5.4.5|root_netrc|absent|medium|fixes/cis-permissions-fix.sh --root-netrc
+5.4.6|root_rhosts|absent|high|fixes/cis-permissions-fix.sh --root-rhosts
+5.4.7|root_forward|absent|low|fixes/cis-permissions-fix.sh --root-forward
+5.4.8|root_login_shell|set|medium|fixes/cis-permissions-fix.sh --root-login-shell
+5.4.9|empty_passwords|none|high|fixes/cis-permissions-fix.sh --no-empty-passwords
+5.4.10|system_accounts_shell|nologin|high|fixes/cis-permissions-fix.sh --system-accounts-shell
+5.4.11|default_umask|027|medium|fixes/cis-permissions-fix.sh --default-umask
+5.4.12|user_shell_timeout|900|medium|fixes/cis-permissions-fix.sh --shell-timeout
+5.4.13|user_dotfiles_perm|750|low|fixes/cis-permissions-fix.sh --dotfiles-perm
+5.4.14|user_dotfiles_owner|self|low|fixes/cis-permissions-fix.sh --dotfiles-owner
+5.4.15|user_forward_files|reviewed|low|
+5.4.16|user_netrc_files|reviewed|low|
+5.4.17|user_rhosts_files|reviewed|medium|
+5.4.18|user_groups|reviewed|medium|
+5.4.19|user_home_dirs|reviewed|medium|
+5.4.20|user_home_perm|750|medium|fixes/cis-permissions-fix.sh --home-perm
+5.4.21|user_home_owner|self|medium|fixes/cis-permissions-fix.sh --home-owner
+5.4.22|user_home_group|self|medium|fixes/cis-permissions-fix.sh --home-group
+5.4.23|user_home_world_writable|none|medium|fixes/cis-permissions-fix.sh --home-world-writable
+5.4.24|user_home_suid|reviewed|low|
+5.4.25|user_home_sgid|reviewed|low|
+
+# Section 5.5 — Session lock
+5.5.1|session_timeout|900|medium|fixes/cis-permissions-fix.sh --session-timeout
+5.5.2|session_lock|yes|medium|fixes/cis-permissions-fix.sh --session-lock
+5.5.3|session_lock_command|set|medium|fixes/cis-permissions-fix.sh --session-lock-cmd
+5.5.4|session_lock_grace|yes|low|fixes/cis-permissions-fix.sh --session-lock-grace
+5.5.5|session_lock_user|yes|medium|fixes/cis-permissions-fix.sh --session-lock-user
+
+# Section 5.6 — sudo
+5.6.1|sudo_installed|yes|medium|fixes/cis-permissions-fix.sh --install-sudo
+5.6.2|sudo_use_pty|yes|medium|fixes/cis-permissions-fix.sh --sudo-pty
+5.6.3|sudo_log|yes|medium|fixes/cis-permissions-fix.sh --sudo-log
+5.6.4|sudoers_perm|440|medium|fixes/cis-permissions-fix.sh --sudoers-perm
+5.6.5|sudoers_owner|root|medium|fixes/cis-permissions-fix.sh --sudoers-owner
+5.6.6|sudo_no_nopasswd|yes|high|fixes/cis-permissions-fix.sh --sudo-no-nopasswd
+5.6.7|sudo_no_root_all|yes|high|fixes/cis-permissions-fix.sh --sudo-no-root-all
+5.6.8|sudo_timeout|configured|low|fixes/cis-permissions-fix.sh --sudo-timeout

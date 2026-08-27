@@ -1,0 +1,91 @@
+# 4-logging.rules — CIS Benchmark v14.0, section 4: Logging and Auditing.
+# Covers rsyslog, journald, auditd rules, and log file permissions.
+#
+# Format: <control_id>|<key>|<expected>|<severity>|<fix_script>
+
+# Section 4.1 — rsyslog
+4.1.1|rsyslog_installed|yes|medium|fixes/cis-permissions-fix.sh --install-rsyslog
+4.1.2|rsyslog_enabled|yes|medium|fixes/cis-permissions-fix.sh --enable-rsyslog
+4.1.3|rsyslog_running|yes|medium|fixes/cis-permissions-fix.sh --enable-rsyslog
+4.1.4|rsyslog_config_file|yes|low|fixes/cis-permissions-fix.sh --rsyslog-config
+4.1.5|rsyslog_logging_auth|yes|medium|fixes/cis-permissions-fix.sh --rsyslog-auth
+4.1.6|rsyslog_logging_all|yes|low|fixes/cis-permissions-fix.sh --rsyslog-all
+4.1.7|rsyslog_remote_logging|configured|low|fixes/cis-permissions-fix.sh --rsyslog-remote
+4.1.8|rsyslog_perm|640|medium|fixes/cis-permissions-fix.sh --rsyslog-perm
+4.1.9|rsyslog_owner|syslog|medium|fixes/cis-permissions-fix.sh --rsyslog-owner
+
+# Section 4.2 — journald
+4.2.1|journald_installed|yes|low|fixes/cis-permissions-fix.sh --install-journald
+4.2.2|journald_enabled|yes|low|fixes/cis-permissions-fix.sh --enable-journald
+4.2.3|journald_persistent|yes|medium|fixes/cis-permissions-fix.sh --journald-persistent
+4.2.4|journald_max_size|configured|low|fixes/cis-permissions-fix.sh --journald-size
+4.2.5|journald_compression|yes|low|fixes/cis-permissions-fix.sh --journald-compress
+4.2.6|journald_forward_to_syslog|yes|low|fixes/cis-permissions-fix.sh --journald-syslog
+4.2.7|journald_max_retention|configured|low|fixes/cis-permissions-fix.sh --journald-retention
+
+# Section 4.3 — log file permissions
+4.3.1|log_perm_auth|640|medium|fixes/cis-permissions-fix.sh --log-perm-auth
+4.3.2|log_perm_messages|640|medium|fixes/cis-permissions-fix.sh --log-perm-messages
+4.3.3|log_perm_cron|600|low|fixes/cis-permissions-fix.sh --log-perm-cron
+4.3.4|log_perm_daemon|640|low|fixes/cis-permissions-fix.sh --log-perm-daemon
+4.3.5|log_perm_kern|640|low|fixes/cis-permissions-fix.sh --log-perm-kern
+4.3.6|log_perm_lpr|640|low|fixes/cis-permissions-fix.sh --log-perm-lpr
+4.3.7|log_perm_mail|640|low|fixes/cis-permissions-fix.sh --log-perm-mail
+4.3.8|log_perm_user|640|low|fixes/cis-permissions-fix.sh --log-perm-user
+4.3.9|log_perm_uucp|640|low|fixes/cis-permissions-fix.sh --log-perm-uucp
+4.3.10|log_perm_local|640|low|fixes/cis-permissions-fix.sh --log-perm-local
+4.3.11|log_perm_news|640|low|fixes/cis-permissions-fix.sh --log-perm-news
+4.3.12|log_perm_audit|640|medium|fixes/cis-permissions-fix.sh --log-perm-audit
+4.3.13|log_owner_root|root|medium|fixes/cis-permissions-fix.sh --log-owner-root
+4.3.14|log_group_root|adm|medium|fixes/cis-permissions-fix.sh --log-group-adm
+
+# Section 4.4 — auditd rules
+4.4.1|auditd_installed|yes|high|fixes/cis-permissions-fix.sh --install-auditd
+4.4.2|auditd_enabled|yes|high|fixes/cis-permissions-fix.sh --enable-auditd
+4.4.3|auditd_running|yes|high|fixes/cis-permissions-fix.sh --enable-auditd
+4.4.4|auditd_backlog_limit|8192|medium|fixes/cis-permissions-fix.sh --auditd-backlog
+4.4.5|auditd_log_perm|600|medium|fixes/cis-permissions-fix.sh --auditd-log-perm
+4.4.6|auditd_log_owner|root|medium|fixes/cis-permissions-fix.sh --auditd-log-owner
+4.4.7|auditd_log_group|adm|medium|fixes/cis-permissions-fix.sh --auditd-log-group
+4.4.8|auditd_log_dir_perm|750|medium|fixes/cis-permissions-fix.sh --auditd-dir-perm
+4.4.9|auditd_log_dir_owner|root|medium|fixes/cis-permissions-fix.sh --auditd-dir-owner
+4.4.10|auditd_log_dir_group|adm|medium|fixes/cis-permissions-fix.sh --auditd-dir-group
+4.4.11|auditd_space_left|configured|medium|fixes/cis-permissions-fix.sh --auditd-space-left
+4.4.12|auditd_admin_space_left|configured|medium|fixes/cis-permissions-fix.sh --auditd-admin-space
+4.4.13|auditd_disk_full_action|configured|medium|fixes/cis-permissions-fix.sh --auditd-disk-full
+4.4.14|auditd_disk_error_action|configured|medium|fixes/cis-permissions-fix.sh --auditd-disk-error
+4.4.15|auditd_max_log_file|configured|medium|fixes/cis-permissions-fix.sh --auditd-max-log
+4.4.16|auditd_max_log_file_action|rotate|medium|fixes/cis-permissions-fix.sh --auditd-max-log-action
+
+# Section 4.5 — auditd rules (events to log)
+4.5.1|audit_date_time|yes|medium|fixes/cis-permissions-fix.sh --audit-date-time
+4.5.2|audit_passwd_changes|yes|high|fixes/cis-permissions-fix.sh --audit-passwd
+4.5.3|audit_group_changes|yes|high|fixes/cis-permissions-fix.sh --audit-group
+4.5.4|audit_sudoers_changes|yes|high|fixes/cis-permissions-fix.sh --audit-sudoers
+4.5.5|audit_sudo_log|yes|high|fixes/cis-permissions-fix.sh --audit-sudo-log
+4.5.6|audit_login_files|yes|medium|fixes/cis-permissions-fix.sh --audit-login
+4.5.7|audit_session_files|yes|medium|fixes/cis-permissions-fix.sh --audit-session
+4.5.8|audit_module_load|yes|medium|fixes/cis-permissions-fix.sh --audit-module
+4.5.9|audit_config_changes|yes|high|fixes/cis-permissions-fix.sh --audit-config
+4.5.10|audit_mac_changes|yes|high|fixes/cis-permissions-fix.sh --audit-mac
+4.5.11|audit_loginuid|yes|medium|fixes/cis-permissions-fix.sh --audit-loginuid
+4.5.12|audit_perm_mod|yes|medium|fixes/cis-permissions-fix.sh --audit-perm-mod
+4.5.13|audit_unauthorized_access|yes|medium|fixes/cis-permissions-fix.sh --audit-unauth-access
+4.5.14|audit_successful_mount|yes|medium|fixes/cis-permissions-fix.sh --audit-mount
+4.5.15|audit_file_deletion|yes|medium|fixes/cis-permissions-fix.sh --audit-file-del
+4.5.16|audit_sudo_actions|yes|medium|fixes/cis-permissions-fix.sh --audit-sudo-actions
+4.5.17|audit_kernel_modules|yes|medium|fixes/cis-permissions-fix.sh --audit-kernel-mod
+4.5.18|audit_root_commands|yes|medium|fixes/cis-permissions-fix.sh --audit-root-cmd
+4.5.19|audit_privileged_commands|yes|high|fixes/cis-permissions-fix.sh --audit-priv-cmd
+4.5.20|audit_media_mount|yes|medium|fixes/cis-permissions-fix.sh --audit-media-mount
+4.5.21|audit_netconfig_changes|yes|medium|fixes/cis-permissions-fix.sh --audit-netconfig
+4.5.22|audit_auditd_config|yes|high|fixes/cis-permissions-fix.sh --audit-auditd-cfg
+4.5.23|audit_audit_rules|yes|high|fixes/cis-permissions-fix.sh --audit-audit-rules
+4.5.24|audit_audit_logs|yes|high|fixes/cis-permissions-fix.sh --audit-audit-logs
+
+# Section 4.6 — log rotation
+4.6.1|logrotate_installed|yes|low|fixes/cis-permissions-fix.sh --install-logrotate
+4.6.2|logrotate_enabled|yes|low|fixes/cis-permissions-fix.sh --enable-logrotate
+4.6.3|logrotate_config|yes|low|fixes/cis-permissions-fix.sh --logrotate-config
+4.6.4|logrotate_daily|yes|low|fixes/cis-permissions-fix.sh --logrotate-daily
+4.6.5|logrotate_compress|yes|low|fixes/cis-permissions-fix.sh --logrotate-compress

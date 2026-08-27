@@ -1,0 +1,129 @@
+# 6-system-maintenance.rules — CIS Benchmark v14.0, section 6: System Maintenance.
+# Covers file permissions, user/group environment, and periodic maintenance checks.
+#
+# Format: <control_id>|<key>|<expected>|<severity>|<fix_script>
+
+# Section 6.1 — File system permissions
+6.1.1|fs_home_perm|750|medium|fixes/cis-permissions-fix.sh --home-perm
+6.1.2|fs_home_owner|self|medium|fixes/cis-permissions-fix.sh --home-owner
+6.1.3|fs_home_group|self|medium|fixes/cis-permissions-fix.sh --home-group
+6.1.4|fs_passwd_perm|644|medium|fixes/cis-permissions-fix.sh --passwd-perm
+6.1.5|fs_passwd_owner|root|medium|fixes/cis-permissions-fix.sh --passwd-owner
+6.1.6|fs_group_perm|644|medium|fixes/cis-permissions-fix.sh --group-perm
+6.1.7|fs_group_owner|root|medium|fixes/cis-permissions-fix.sh --group-owner
+6.1.8|fs_shadow_perm|640|high|fixes/cis-permissions-fix.sh --shadow-perm
+6.1.9|fs_shadow_owner|root|high|fixes/cis-permissions-fix.sh --shadow-owner
+6.1.10|fs_gshadow_perm|640|high|fixes/cis-permissions-fix.sh --gshadow-perm
+6.1.11|fs_gshadow_owner|root|high|fixes/cis-permissions-fix.sh --gshadow-owner
+6.1.12|fs_passwd_backup_perm|600|low|fixes/cis-permissions-fix.sh --passwd-backup-perm
+6.1.13|fs_group_backup_perm|600|low|fixes/cis-permissions-fix.sh --group-backup-perm
+6.1.14|fs_shadow_backup_perm|600|medium|fixes/cis-permissions-fix.sh --shadow-backup-perm
+6.1.15|fs_gshadow_backup_perm|600|medium|fixes/cis-permissions-fix.sh --gshadow-backup-perm
+6.1.16|fs_world_writable|reviewed|medium|
+6.1.17|fs_unowned|none|low|fixes/cis-permissions-fix.sh --unowned-files
+6.1.18|fs_ungrouped|none|low|fixes/cis-permissions-fix.sh --ungrouped-files
+6.1.19|fs_suid|reviewed|low|
+6.1.20|fs_sgid|reviewed|low|
+6.1.21|fs_sticky_world_writable|yes|medium|fixes/cis-permissions-fix.sh --sticky-bit
+6.1.22|fs_crontab_perm|600|low|fixes/cis-permissions-fix.sh --cron-perm
+6.1.23|fs_crontab_owner|root|low|fixes/cis-permissions-fix.sh --cron-owner
+6.1.24|fs_cron_hourly_perm|700|low|fixes/cis-permissions-fix.sh --cron-dir-perm
+6.1.25|fs_cron_daily_perm|700|low|fixes/cis-permissions-fix.sh --cron-dir-perm
+6.1.26|fs_cron_weekly_perm|700|low|fixes/cis-permissions-fix.sh --cron-dir-perm
+6.1.27|fs_cron_monthly_perm|700|low|fixes/cis-permissions-fix.sh --cron-dir-perm
+6.1.28|fs_cron_d_perm|700|low|fixes/cis-permissions-fix.sh --cron-dir-perm
+6.1.29|fs_at_allow|reviewed|low|
+6.1.30|fs_at_deny|reviewed|low|
+6.1.31|fs_cron_allow|reviewed|low|
+6.1.32|fs_cron_deny|absent|low|fixes/cis-permissions-fix.sh --cron-deny-absent
+6.1.33|fs_ssh_host_private_key_perm|600|high|fixes/cis-permissions-fix.sh --ssh-hostkey-perm
+6.1.34|fs_ssh_host_private_key_owner|root|high|fixes/cis-permissions-fix.sh --ssh-hostkey-owner
+6.1.35|fs_ssh_host_public_key_perm|644|medium|fixes/cis-permissions-fix.sh --ssh-hostkey-pub-perm
+6.1.36|fs_ssh_host_public_key_owner|root|medium|fixes/cis-permissions-fix.sh --ssh-hostkey-pub-owner
+6.1.37|fs_ssh_config_perm|644|low|fixes/cis-permissions-fix.sh --ssh-config-perm
+6.1.38|fs_ssh_config_owner|root|low|fixes/cis-permissions-fix.sh --ssh-config-owner
+6.1.39|fs_sshd_config_perm|600|medium|fixes/cis-permissions-fix.sh --sshd-config-perm
+6.1.40|fs_sshd_config_owner|root|medium|fixes/cis-permissions-fix.sh --sshd-config-owner
+6.1.41|fs_ssh_root_dir_perm|600|medium|fixes/cis-permissions-fix.sh --ssh-root-dir-perm
+6.1.42|fs_ssh_root_dir_owner|root|medium|fixes/cis-permissions-fix.sh --ssh-root-dir-owner
+6.1.43|fs_ssh_user_authorized_keys_perm|600|medium|fixes/cis-permissions-fix.sh --ssh-user-keys-perm
+6.1.44|fs_ssh_user_authorized_keys_owner|self|medium|fixes/cis-permissions-fix.sh --ssh-user-keys-owner
+6.1.45|fs_ssh_user_keys_perm|600|medium|fixes/cis-permissions-fix.sh --ssh-user-keys-perm
+6.1.46|fs_ssh_user_keys_owner|self|medium|fixes/cis-permissions-fix.sh --ssh-user-keys-owner
+6.1.47|fs_ssh_root_authorized_keys_perm|600|medium|fixes/cis-permissions-fix.sh --ssh-root-keys-perm
+6.1.48|fs_ssh_root_authorized_keys_owner|root|medium|fixes/cis-permissions-fix.sh --ssh-root-keys-owner
+6.1.49|fs_audit_log_perm|640|medium|fixes/cis-permissions-fix.sh --audit-log-perm
+6.1.50|fs_audit_log_owner|root|medium|fixes/cis-permissions-fix.sh --audit-log-owner
+6.1.51|fs_audit_log_group|adm|medium|fixes/cis-permissions-fix.sh --audit-log-group
+6.1.52|fs_audit_dir_perm|750|medium|fixes/cis-permissions-fix.sh --audit-dir-perm
+6.1.53|fs_audit_dir_owner|root|medium|fixes/cis-permissions-fix.sh --audit-dir-owner
+6.1.54|fs_audit_dir_group|adm|medium|fixes/cis-permissions-fix.sh --audit-dir-group
+6.1.55|fs_rsyslog_perm|640|medium|fixes/cis-permissions-fix.sh --rsyslog-perm
+6.1.56|fs_rsyslog_owner|syslog|medium|fixes/cis-permissions-fix.sh --rsyslog-owner
+6.1.57|fs_rsyslog_conf_perm|644|low|fixes/cis-permissions-fix.sh --rsyslog-conf-perm
+6.1.58|fs_rsyslog_conf_owner|root|low|fixes/cis-permissions-fix.sh --rsyslog-conf-owner
+6.1.59|fs_logrotate_conf_perm|644|low|fixes/cis-permissions-fix.sh --logrotate-conf-perm
+6.1.60|fs_logrotate_conf_owner|root|low|fixes/cis-permissions-fix.sh --logrotate-conf-owner
+6.1.61|fs_sudoers_perm|440|medium|fixes/cis-permissions-fix.sh --sudoers-perm
+6.1.62|fs_sudoers_owner|root|medium|fixes/cis-permissions-fix.sh --sudoers-owner
+6.1.63|fs_sudoers_d_perm|440|medium|fixes/cis-permissions-fix.sh --sudoers-d-perm
+6.1.64|fs_sudoers_d_owner|root|medium|fixes/cis-permissions-fix.sh --sudoers-d-owner
+
+# Section 6.2 — User and group settings
+6.2.1|user_root_gid_zero|0|high|fixes/cis-permissions-fix.sh --root-gid
+6.2.2|user_root_shell|set|medium|fixes/cis-permissions-fix.sh --root-shell
+6.2.3|user_root_path|clean|medium|fixes/cis-permissions-fix.sh --root-path
+6.2.4|user_root_home_perm|700|medium|fixes/cis-permissions-fix.sh --root-home-perm
+6.2.5|user_root_netrc|absent|medium|fixes/cis-permissions-fix.sh --root-netrc
+6.2.6|user_root_rhosts|absent|high|fixes/cis-permissions-fix.sh --root-rhosts
+6.2.7|user_root_forward|absent|low|fixes/cis-permissions-fix.sh --root-forward
+6.2.8|user_uid_unique|yes|medium|
+6.2.9|user_gid_unique|yes|medium|
+6.2.10|user_duplicate_uid|none|medium|
+6.2.11|user_duplicate_gid|none|medium|
+6.2.12|user_duplicate_username|none|medium|
+6.2.13|user_duplicate_groupname|none|medium|
+6.2.14|user_duplicate_home|none|medium|
+6.2.15|user_no_shadow|none|high|fixes/cis-permissions-fix.sh --no-shadow
+6.2.16|user_shadow_not_empty|yes|high|fixes/cis-permissions-fix.sh --shadow-not-empty
+6.2.17|user_no_plus_in_passwd|yes|high|fixes/cis-permissions-fix.sh --no-plus-passwd
+6.2.18|user_no_plus_in_shadow|yes|high|fixes/cis-permissions-fix.sh --no-plus-shadow
+6.2.19|user_no_plus_in_group|yes|high|fixes/cis-permissions-fix.sh --no-plus-group
+6.2.20|user_no_uid_zero_except_root|yes|high|fixes/cis-permissions-fix.sh --uid-zero-root
+6.2.21|user_home_exists|yes|medium|fixes/cis-permissions-fix.sh --home-exists
+6.2.22|user_home_perm|750|medium|fixes/cis-permissions-fix.sh --home-perm
+6.2.23|user_home_owner|self|medium|fixes/cis-permissions-fix.sh --home-owner
+6.2.24|user_home_group|self|medium|fixes/cis-permissions-fix.sh --home-group
+6.2.25|user_netrc|reviewed|low|
+6.2.26|user_netrc_perm|600|low|fixes/cis-permissions-fix.sh --netrc-perm
+6.2.27|user_netrc_owner|self|low|fixes/cis-permissions-fix.sh --netrc-owner
+6.2.28|user_rhosts|reviewed|medium|
+6.2.29|user_rhosts_absent|yes|medium|fixes/cis-permissions-fix.sh --user-rhosts-absent
+6.2.30|user_forward|reviewed|low|
+6.2.31|user_forward_absent|yes|low|fixes/cis-permissions-fix.sh --user-forward-absent
+6.2.32|user_groups_reviewed|yes|medium|
+6.2.33|user_dot_files_perm|reviewed|low|
+6.2.34|user_dot_files_owner|reviewed|low|
+6.2.35|user_dot_files_group|reviewed|low|
+6.2.36|user_dot_files_world_writable|none|medium|fixes/cis-permissions-fix.sh --dot-world-writable
+6.2.37|user_dot_files_suid|reviewed|low|
+6.2.38|user_dot_files_sgid|reviewed|low|
+6.2.39|user_dot_files_exec|reviewed|low|
+6.2.40|user_dot_bashrc_perm|644|low|fixes/cis-permissions-fix.sh --bashrc-perm
+6.2.41|user_dot_bashrc_owner|self|low|fixes/cis-permissions-fix.sh --bashrc-owner
+6.2.42|user_dot_profile_perm|644|low|fixes/cis-permissions-fix.sh --profile-perm
+6.2.43|user_dot_profile_owner|self|low|fixes/cis-permissions-fix.sh --profile-owner
+6.2.44|user_dot_bash_history_perm|600|low|fixes/cis-permissions-fix.sh --bash-history-perm
+6.2.45|user_dot_bash_history_owner|self|low|fixes/cis-permissions-fix.sh --bash-history-owner
+
+# Section 6.3 — Periodic checks
+6.3.1|periodic_audit_review|yes|medium|
+6.3.2|periodic_log_review|yes|medium|
+6.3.3|periodic_user_review|yes|medium|
+6.3.4|periodic_group_review|yes|medium|
+6.3.5|periodic_file_perm_review|yes|low|
+6.3.6|periodic_suid_review|yes|low|
+6.3.7|periodic_sgid_review|yes|low|
+6.3.8|periodic_world_writable_review|yes|low|
+6.3.9|periodic_unowned_review|yes|low|
+6.3.10|periodic_cron_review|yes|low|

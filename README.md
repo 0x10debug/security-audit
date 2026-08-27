@@ -11,7 +11,9 @@ Built for operators who run their own Linux VPS and want continuous, automated s
 | Module | What it checks | Fix command included |
 |---|---|---|
 | `cis-benchmark` | SSH hardening, firewall defaults, kernel sysctl params, Docker daemon config, auto-updates | Yes |
+| `cis-v14` | CIS Benchmark v14.0 checks (same as cis-benchmark, aliased for explicit v14.0 runs) | Yes |
 | `lynis` | Full system hardening scan via Lynis (auto-installs if missing) | Lynis suggestions |
+| `lynis-score` | Lynis CIS compliance scoring — runs Lynis, maps results to CIS v14.0 controls, produces a 0–100 compliance score with per-chapter breakdown (TXT + JSON) | Yes |
 | `log-audit` | Failed SSH logins, successful logins from new IPs, sudo events, user add/remove, crontab changes, file integrity mtime | Yes |
 | `container-scan` | Trivy vulnerability scan of all running Docker images, grouped by Critical/High/Medium/Low | Yes |
 | `drift` | Compares current SSH, firewall, kernel, Docker state against a baseline snapshot | Yes |
@@ -53,6 +55,42 @@ Reports are saved to `/var/log/mb-audit/reports/`:
 
 ```bash
 sudo ./mb audit run --module cis-benchmark,log-audit
+```
+
+### Run CIS v14.0 compliance scoring
+
+```bash
+# Run the Lynis-based CIS v14.0 compliance scoring module
+sudo ./mb audit run --module lynis-score
+
+# Score report is saved to:
+#   /var/log/mb-audit/reports/cis-score-latest.txt
+#   /var/log/mb-audit/reports/cis-score-latest.json
+```
+
+The scoring module runs Lynis, maps the results to the full CIS Benchmark v14.0
+control set (6 chapters, 300+ controls), and produces a weighted compliance
+score (0–100) with per-chapter breakdown. See
+[`docs/cis-v14.0-mapping.md`](docs/cis-v14.0-mapping.md) for the complete
+control-to-fix mapping.
+
+### Apply CIS v14.0 remediation scripts
+
+```bash
+# SSH hardening (CIS v14.0 section 5.1)
+sudo fixes/cis-ssh-hardening.sh --all
+
+# Kernel & network hardening (CIS v14.0 sections 3.1/3.2/1.6)
+sudo fixes/cis-kernel-hardening.sh --all
+
+# Firewall setup (CIS v14.0 section 3.4)
+sudo fixes/cis-firewall-setup.sh --all
+
+# File permissions & system maintenance (CIS v14.0 sections 1.1/6.1/6.2)
+sudo fixes/cis-permissions-fix.sh --all
+
+# Preview any fix without applying
+sudo fixes/cis-ssh-hardening.sh --all --dry-run
 ```
 
 ### Create a baseline snapshot
@@ -126,6 +164,7 @@ At `/etc/mb-backup/baseline.yaml`, the same location vps-bootstrap writes its ba
 
 - [Audit Guide](docs/audit-guide.md) — how to run audits and interpret reports
 - [CIS Benchmark](docs/cis-benchmark.md) — what controls are checked and why
+- [CIS v14.0 Mapping](docs/cis-v14.0-mapping.md) — full CIS v14.0 control → audit rule → fix script mapping and scoring methodology
 - [Drift Detection](docs/drift-detection.md) — how drift detection works and why it matters
 - [Custom Rules](docs/custom-rules.md) — how to write your own audit rules
 
