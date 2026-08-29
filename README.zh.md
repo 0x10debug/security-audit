@@ -16,6 +16,7 @@
 | `lynis-score` | Lynis CIS 合规评分 — 运行 Lynis，将结果映射到 CIS v14.0 控制项，生成 0–100 合规评分及按章节分组的报告（TXT + JSON） | 是 |
 | `log-audit` | SSH 失败登录、来自新 IP 的成功登录、sudo 事件、用户增删、crontab 修改、敏感文件 mtime 完整性 | 是 |
 | `container-scan` | 用 Trivy 扫描所有运行中 Docker 镜像，按 Critical/High/Medium/Low 分组 | 是 |
+| `crowdsec` | CrowdSec 部署与安全配置审计 — 安装状态、采集源、场景、bouncer、决策/告警、威胁情报、API 暴露、配置文件权限（TXT + JSON） | 是 |
 | `drift` | 将当前 SSH、防火墙、内核、Docker 状态与基线快照对比 | 是 |
 
 ---
@@ -165,6 +166,7 @@ Lynis 只是其中一个模块。本工具还做日志分析、容器 CVE 扫描
 - [CIS Benchmark](docs/cis-benchmark.md) — 检查了哪些控制项及原因
 - [CIS v14.0 映射](docs/cis-v14.0-mapping.md) — 完整的 CIS v14.0 控制项→审计规则→修复脚本映射及评分方法说明
 - [漂移检测](docs/drift-detection.md) — 漂移检测的工作原理与意义
+- [CrowdSec 审计](docs/crowdsec-audit.md) — CrowdSec 部署与安全配置审计
 - [自定义规则](docs/custom-rules.md) — 如何编写自定义审计规则
 
 ---

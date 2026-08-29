@@ -16,6 +16,7 @@ Built for operators who run their own Linux VPS and want continuous, automated s
 | `lynis-score` | Lynis CIS compliance scoring — runs Lynis, maps results to CIS v14.0 controls, produces a 0–100 compliance score with per-chapter breakdown (TXT + JSON) | Yes |
 | `log-audit` | Failed SSH logins, successful logins from new IPs, sudo events, user add/remove, crontab changes, file integrity mtime | Yes |
 | `container-scan` | Trivy vulnerability scan of all running Docker images, grouped by Critical/High/Medium/Low | Yes |
+| `crowdsec` | CrowdSec deployment & security posture audit — installation, acquisition sources, scenarios, bouncers, decisions/alerts, threat intel, API exposure, config permissions (TXT + JSON) | Yes |
 | `drift` | Compares current SSH, firewall, kernel, Docker state against a baseline snapshot | Yes |
 
 ---
@@ -166,6 +167,7 @@ At `/etc/mb-backup/baseline.yaml`, the same location vps-bootstrap writes its ba
 - [CIS Benchmark](docs/cis-benchmark.md) — what controls are checked and why
 - [CIS v14.0 Mapping](docs/cis-v14.0-mapping.md) — full CIS v14.0 control → audit rule → fix script mapping and scoring methodology
 - [Drift Detection](docs/drift-detection.md) — how drift detection works and why it matters
+- [CrowdSec Audit](docs/crowdsec-audit.md) — CrowdSec deployment & security posture audit
 - [Custom Rules](docs/custom-rules.md) — how to write your own audit rules
 
 ---

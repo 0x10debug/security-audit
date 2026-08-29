@@ -29,9 +29,10 @@ declare -A MB_MODULES=(
     [lynis-score]="${MB_MODULES_DIR}/lynis-scoring.sh"
     [log-audit]="${MB_MODULES_DIR}/log-audit.sh"
     [container-scan]="${MB_MODULES_DIR}/container-scan.sh"
+    [crowdsec]="${MB_MODULES_DIR}/crowdsec-audit.sh"
     [drift]="${MB_MODULES_DIR}/drift.sh"
 )
-MB_ALL_MODULES="cis-benchmark,cis-v14,lynis,lynis-score,log-audit,container-scan,drift"
+MB_ALL_MODULES="cis-benchmark,cis-v14,lynis,lynis-score,log-audit,container-scan,crowdsec,drift"
 
 # ---------------------------------------------------------------------------
 # Help
@@ -127,6 +128,7 @@ mb_audit_run() {
             lynis-score)    mb_lynis_scoring_run ;;
             log-audit)      log_audit_run ;;
             container-scan) mb_container_scan ;;
+            crowdsec)       mb_audit_crowdsec ;;
             drift)          mb_drift_run ;;
         esac
     done > "$findings" 2> >(grep -E '^(PASS|FAIL|WARN)\|' || true)
