@@ -31,9 +31,10 @@ declare -A MB_MODULES=(
     [container-scan]="${MB_MODULES_DIR}/container-scan.sh"
     [crowdsec]="${MB_MODULES_DIR}/crowdsec-audit.sh"
     [docker]="${MB_MODULES_DIR}/docker-audit.sh"
+    [k8s]="${MB_MODULES_DIR}/k8s-audit.sh"
     [drift]="${MB_MODULES_DIR}/drift.sh"
 )
-MB_ALL_MODULES="cis-benchmark,cis-v14,lynis,lynis-score,log-audit,container-scan,crowdsec,docker,drift"
+MB_ALL_MODULES="cis-benchmark,cis-v14,lynis,lynis-score,log-audit,container-scan,crowdsec,docker,k8s,drift"
 
 # ---------------------------------------------------------------------------
 # Help
