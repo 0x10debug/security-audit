@@ -17,6 +17,7 @@
 | `log-audit` | SSH 失败登录、来自新 IP 的成功登录、sudo 事件、用户增删、crontab 修改、敏感文件 mtime 完整性 | 是 |
 | `container-scan` | 用 Trivy 扫描所有运行中 Docker 镜像，按 Critical/High/Medium/Low 分组 | 是 |
 | `crowdsec` | CrowdSec 部署与安全配置审计 — 安装状态、采集源、场景、bouncer、决策/告警、威胁情报、API 暴露、配置文件权限（TXT + JSON） | 是 |
+| `docker` | Docker 安全审计（CIS Docker Benchmark v1.6.0）— daemon 配置、容器安全姿态（privileged、cap、命名空间共享、root 用户、只读 rootfs、healthcheck、资源限制、敏感挂载）、镜像安全（tag pinning、内容信任、dangling 镜像）、Compose 安全（TXT + JSON） | 是 |
 | `drift` | 将当前 SSH、防火墙、内核、Docker 状态与基线快照对比 | 是 |
 
 ---
@@ -167,6 +168,7 @@ Lynis 只是其中一个模块。本工具还做日志分析、容器 CVE 扫描
 - [CIS v14.0 映射](docs/cis-v14.0-mapping.md) — 完整的 CIS v14.0 控制项→审计规则→修复脚本映射及评分方法说明
 - [漂移检测](docs/drift-detection.md) — 漂移检测的工作原理与意义
 - [CrowdSec 审计](docs/crowdsec-audit.md) — CrowdSec 部署与安全配置审计
+- [Docker 审计](docs/docker-audit.md) — Docker 安全审计（CIS Docker Benchmark v1.6.0）
 - [自定义规则](docs/custom-rules.md) — 如何编写自定义审计规则
 
 ---

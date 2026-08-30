@@ -30,9 +30,10 @@ declare -A MB_MODULES=(
     [log-audit]="${MB_MODULES_DIR}/log-audit.sh"
     [container-scan]="${MB_MODULES_DIR}/container-scan.sh"
     [crowdsec]="${MB_MODULES_DIR}/crowdsec-audit.sh"
+    [docker]="${MB_MODULES_DIR}/docker-audit.sh"
     [drift]="${MB_MODULES_DIR}/drift.sh"
 )
-MB_ALL_MODULES="cis-benchmark,cis-v14,lynis,lynis-score,log-audit,container-scan,crowdsec,drift"
+MB_ALL_MODULES="cis-benchmark,cis-v14,lynis,lynis-score,log-audit,container-scan,crowdsec,docker,drift"
 
 # ---------------------------------------------------------------------------
 # Help
@@ -129,6 +130,7 @@ mb_audit_run() {
             log-audit)      log_audit_run ;;
             container-scan) mb_container_scan ;;
             crowdsec)       mb_audit_crowdsec ;;
+            docker)         mb_audit_docker ;;
             drift)          mb_drift_run ;;
         esac
     done > "$findings" 2> >(grep -E '^(PASS|FAIL|WARN)\|' || true)
