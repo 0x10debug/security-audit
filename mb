@@ -13,6 +13,11 @@
 #   mb audit drift                           Check for config drift against baseline.
 #   mb audit update                          Update audit rules (git pull).
 #   mb audit help                            Show help.
+#   mb compliance map                        Multi-framework compliance mapping.
+#   mb compliance oscal                      Generate OSCAL JSON output.
+#   mb compliance remediate                  Generate auto-remediation script.
+#   mb compliance all                        Generate all compliance outputs.
+#   mb compliance help                       Show compliance help.
 set -euo pipefail
 
 # Resolve the directory of this script.
@@ -34,6 +39,7 @@ declare -A MB_MODULES=(
     [k8s]="${MB_MODULES_DIR}/k8s-audit.sh"
     [auditd]="${MB_MODULES_DIR}/auditd-rules-audit.sh"
     [drift]="${MB_MODULES_DIR}/drift.sh"
+    [compliance-output]="${MB_MODULES_DIR}/compliance-output.sh"
 )
 MB_ALL_MODULES="cis-benchmark,cis-v14,lynis,lynis-score,log-audit,container-scan,crowdsec,docker,k8s,auditd,drift"
 
@@ -83,6 +89,14 @@ ${MB_COLOR_BOLD}REPORTS${MB_COLOR_RESET}
 
 ${MB_COLOR_BOLD}DOCUMENTATION${MB_COLOR_RESET}
   https://github.com/0x10debug/security-audit#readme
+
+${MB_COLOR_BOLD}COMPLIANCE OUTPUT${MB_COLOR_RESET}
+  mb compliance map        Multi-framework mapping (NIST/ISO/PCI/SOC2/HIPAA).
+  mb compliance oscal      Generate OSCAL 1.0.6 assessment-results JSON.
+  mb compliance remediate  Generate auto-remediation script from findings.
+  mb compliance all        Generate all compliance outputs.
+  mb compliance help       Show compliance help.
+  Options: --input <file>, --output <file>, --dry-run
 
 EOF
 }
@@ -274,6 +288,15 @@ mb_audit_update() {
 }
 
 # ---------------------------------------------------------------------------
+# mb compliance
+# ---------------------------------------------------------------------------
+mb_compliance() {
+    # shellcheck source=modules/compliance-output.sh
+    source "${MB_MODULES_DIR}/compliance-output.sh"
+    compliance_output_run "$@"
+}
+
+# ---------------------------------------------------------------------------
 # Dispatcher
 # ---------------------------------------------------------------------------
 main() {
@@ -282,16 +305,23 @@ main() {
         exit 0
     fi
 
-    # Top-level keyword is "audit".
-    if [[ "$1" != "audit" ]]; then
+    # Top-level keyword is "audit" or "compliance".
+    if [[ "$1" != "audit" && "$1" != "compliance" ]]; then
         mb_error "Unknown command: $1"
         mb_audit_help
         exit 1
     fi
+
+    local top_cmd="$1"
     shift
 
     local sub="${1:-help}"
     shift || true
+
+    if [[ "$top_cmd" == "compliance" ]]; then
+        mb_compliance "$sub" "$@"
+        return 0
+    fi
 
     case "$sub" in
         run)       mb_audit_run "$@" ;;
