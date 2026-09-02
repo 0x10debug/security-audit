@@ -1,125 +1,125 @@
-# VPS 安全审计 — CIS Benchmark、漂移检测与自动修复
+# VPS Security Audit — CIS Benchmark, Drift Detection and Auto-Remediation
 
-一个自托管的 VPS 安全审计工具：按 CIS Benchmark 控制项检查服务器、分析 auth 日志中的可疑活动、扫描运行中 Docker 容器的已知 CVE、并基于可信基线检测配置漂移。每一条发现都附带可直接执行的修复命令——从"发现问题"到"解决问题"只需一步。
+A self-hosted VPS security audit tool: checks servers against CIS Benchmark controls, analyzes auth logs for suspicious activity, scans running Docker containers for known CVEs, and detects configuration drift against a trusted baseline. Every finding comes with a directly executable remediation command — from "discovering a problem" to "fixing it" takes just one step.
 
-为自建 Linux VPS、希望持续自动加固安全但又不想引入商业 SIEM 的运维人员设计。与 [0x10debug/vps-bootstrap](https://github.com/0x10debug/vps-bootstrap)（初始服务器加固）和 [0x10debug/monitor-stack](https://github.com/0x10debug/monitor-stack)（监控与告警）配套使用。纯 Bash 实现，除标准系统工具外无运行时依赖，所有脚本幂等可重复执行。
+Designed for operators running self-built Linux VPSes who want continuous automated security hardening without introducing a commercial SIEM. Used alongside [0x10debug/vps-bootstrap](https://github.com/0x10debug/vps-bootstrap) (initial server hardening) and [0x10debug/monitor-stack](https://github.com/0x10debug/monitor-stack) (monitoring and alerting). Pure Bash implementation with no runtime dependencies beyond standard system tools; all scripts are idempotent and repeatable.
 
 ---
 
-## 审计模块
+## Audit Modules
 
-| 模块 | 检查内容 | 附带修复命令 |
+| Module | What it checks | Includes remediation commands |
 |---|---|---|
-| `cis-benchmark` | SSH 加固、防火墙默认策略、内核 sysctl 参数、Docker daemon 配置、自动更新 | 是 |
-| `cis-v14` | CIS Benchmark v14.0 检查（与 cis-benchmark 相同，显式指定 v14.0 运行的别名） | 是 |
-| `lynis` | 通过 Lynis 进行全系统加固扫描（缺失时自动安装） | Lynis 建议 |
-| `lynis-score` | Lynis CIS 合规评分 — 运行 Lynis，将结果映射到 CIS v14.0 控制项，生成 0–100 合规评分及按章节分组的报告（TXT + JSON） | 是 |
-| `log-audit` | SSH 失败登录、来自新 IP 的成功登录、sudo 事件、用户增删、crontab 修改、敏感文件 mtime 完整性 | 是 |
-| `container-scan` | 用 Trivy 扫描所有运行中 Docker 镜像，按 Critical/High/Medium/Low 分组 | 是 |
-| `crowdsec` | CrowdSec 部署与安全配置审计 — 安装状态、采集源、场景、bouncer、决策/告警、威胁情报、API 暴露、配置文件权限（TXT + JSON） | 是 |
-| `docker` | Docker 安全审计（CIS Docker Benchmark v1.6.0）— daemon 配置、容器安全姿态（privileged、cap、命名空间共享、root 用户、只读 rootfs、healthcheck、资源限制、敏感挂载）、镜像安全（tag pinning、内容信任、dangling 镜像）、Compose 安全（TXT + JSON） | 是 |
-| `drift` | 将当前 SSH、防火墙、内核、Docker 状态与基线快照对比 | 是 |
+| `cis-benchmark` | SSH hardening, firewall default policies, kernel sysctl parameters, Docker daemon configuration, automatic updates | Yes |
+| `cis-v14` | CIS Benchmark v14.0 checks (same as cis-benchmark, an alias for explicitly running v14.0) | Yes |
+| `lynis` | Full system hardening scan via Lynis (auto-installs if missing) | Lynis suggestions |
+| `lynis-score` | Lynis CIS compliance scoring — runs Lynis, maps results to CIS v14.0 controls, generates a 0–100 compliance score and a chapter-grouped report (TXT + JSON) | Yes |
+| `log-audit` | SSH failed logins, successful logins from new IPs, sudo events, user add/remove, crontab modifications, sensitive file mtime integrity | Yes |
+| `container-scan` | Scans all running Docker images with Trivy, grouped by Critical/High/Medium/Low | Yes |
+| `crowdsec` | CrowdSec deployment and security configuration audit — installation status, acquisition sources, scenarios, bouncers, decisions/alerts, threat intelligence, API exposure, config file permissions (TXT + JSON) | Yes |
+| `docker` | Docker security audit (CIS Docker Benchmark v1.6.0) — daemon configuration, container security posture (privileged, cap, namespace sharing, root user, readonly rootfs, healthcheck, resource limits, sensitive mounts), image security (tag pinning, content trust, dangling images), Compose security (TXT + JSON) | Yes |
+| `drift` | Compares current SSH, firewall, kernel, and Docker state against a baseline snapshot | Yes |
 
 ---
 
-## 快速开始
+## Quick Start
 
 ```bash
-# 克隆
+# Clone
 git clone https://github.com/0x10debug/security-audit.git
 cd security-audit
 
-# 运行完整审计（生成 HTML + JSON 报告）
+# Run a full audit (generates HTML + JSON reports)
 sudo ./mb audit run
 
-# 查看上次运行摘要
+# View summary of the last run
 ./mb audit status
 
-# 打开最新 HTML 报告
+# Open the latest HTML report
 ./mb audit report
 
-# 预览修复内容但不实际执行
+# Preview remediation without applying changes
 sudo ./mb audit fix --dry-run
 
-# 应用所有修复
+# Apply all fixes
 sudo ./mb audit fix
 ```
 
-报告保存在 `/var/log/mb-audit/reports/`：
-- `audit-latest.html` — 人类可读报告（指向最新运行的符号链接）
-- `audit-latest.json` — 机器可读报告，便于集成
+Reports are saved in `/var/log/mb-audit/reports/`:
+- `audit-latest.html` — human-readable report (symlink pointing to the latest run)
+- `audit-latest.json` — machine-readable report for integration
 
 ---
 
-## 用法
+## Usage
 
-### 只运行指定模块
+### Run only specific modules
 
 ```bash
 sudo ./mb audit run --module cis-benchmark,log-audit
 ```
 
-### 运行 CIS v14.0 合规评分
+### Run CIS v14.0 compliance scoring
 
 ```bash
-# 运行基于 Lynis 的 CIS v14.0 合规评分模块
+# Run the Lynis-based CIS v14.0 compliance scoring module
 sudo ./mb audit run --module lynis-score
 
-# 评分报告保存到：
+# Scoring reports are saved to:
 #   /var/log/mb-audit/reports/cis-score-latest.txt
 #   /var/log/mb-audit/reports/cis-score-latest.json
 ```
 
-评分模块运行 Lynis，将结果映射到完整的 CIS Benchmark v14.0 控制项集
-（6 个章节、300+ 控制项），生成加权合规评分（0–100）及按章节分组的报告。
-完整的控制项→修复脚本映射见
-[`docs/cis-v14.0-mapping.md`](docs/cis-v14.0-mapping.md)。
+The scoring module runs Lynis, maps results to the full CIS Benchmark v14.0 control set
+(6 chapters, 300+ controls), generates a weighted compliance score (0–100) and a chapter-grouped report.
+For the complete control→remediation script mapping, see
+[`docs/cis-v14.0-mapping.md`](docs/cis-v14.0-mapping.md).
 
-### 应用 CIS v14.0 修复脚本
+### Apply CIS v14.0 remediation scripts
 
 ```bash
-# SSH 加固（CIS v14.0 第 5.1 节）
+# SSH hardening (CIS v14.0 Section 5.1)
 sudo fixes/cis-ssh-hardening.sh --all
 
-# 内核与网络加固（CIS v14.0 第 3.1/3.2/1.6 节）
+# Kernel and network hardening (CIS v14.0 Sections 3.1/3.2/1.6)
 sudo fixes/cis-kernel-hardening.sh --all
 
-# 防火墙配置（CIS v14.0 第 3.4 节）
+# Firewall configuration (CIS v14.0 Section 3.4)
 sudo fixes/cis-firewall-setup.sh --all
 
-# 文件权限与系统维护（CIS v14.0 第 1.1/6.1/6.2 节）
+# File permissions and system maintenance (CIS v14.0 Sections 1.1/6.1/6.2)
 sudo fixes/cis-permissions-fix.sh --all
 
-# 预览修复内容但不实际执行
+# Preview remediation without applying changes
 sudo fixes/cis-ssh-hardening.sh --all --dry-run
 ```
 
-### 创建基线快照
+### Create a baseline snapshot
 
-捕获当前可信状态，以便日后检测漂移：
+Capture the current trusted state so you can detect drift later:
 
 ```bash
 sudo ./mb audit baseline
 ```
 
-基线保存到 `/etc/mb-backup/baseline.yaml`（与 vps-bootstrap 对齐）。
+The baseline is saved to `/etc/mb-backup/baseline.yaml` (aligned with vps-bootstrap).
 
-### 检查配置漂移
+### Check configuration drift
 
 ```bash
 sudo ./mb audit drift
 ```
 
-### 设置每日定时审计（cron）
+### Set up daily scheduled audit (cron)
 
 ```bash
-sudo ./mb audit schedule --daily        # 默认 03:15
+sudo ./mb audit schedule --daily        # default 03:15
 sudo ./mb audit schedule --daily --hour 4 --minute 30
 sudo ./mb audit schedule --remove
-sudo ./mb audit schedule                # 查看当前状态
+sudo ./mb audit schedule                # view current status
 ```
 
-### 更新工具
+### Update the tool
 
 ```bash
 sudo ./mb audit update      # git pull
@@ -127,9 +127,9 @@ sudo ./mb audit update      # git pull
 
 ---
 
-## 自定义规则
+## Custom Rules
 
-规则文件位于 `rules/*.rules`，采用简单的 `key=value` 格式。按你的环境修改：
+Rule files are located in `rules/*.rules` and use a simple `key=value` format. Modify them for your environment:
 
 ```bash
 # rules/cis-ssh.rules
@@ -138,48 +138,48 @@ PermitRootLogin=no
 PasswordAuthentication=no
 ```
 
-编写自定义检查请见 [`docs/custom-rules.md`](docs/custom-rules.md)，将 `rules/custom.rules.example` 复制为 `rules/custom.rules` 即可开始。
+For writing custom checks, see [`docs/custom-rules.md`](docs/custom-rules.md); copy `rules/custom.rules.example` to `rules/custom.rules` to get started.
 
 ---
 
-## 常见问题
+## FAQ
 
-**1. 需要联网吗？**
-仅首次运行时（若需安装 Lynis 或 Trivy）需要联网。之后审计可完全离线运行。`mb audit update`（git pull）需要联网。
+**1. Does it require an internet connection?**
+Only on first run (if Lynis or Trivy need to be installed). After that, audits can run fully offline. `mb audit update` (git pull) requires connectivity.
 
-**2. 在生产服务器上运行 `mb audit fix` 安全吗？**
-请务必先加 `--dry-run` 预览。修复脚本会备份每个被修改的文件（`.mb.bak.<时间戳>`），且只修改与期望值不同的指令。SSH 重启会自动处理。
+**2. Is it safe to run `mb audit fix` on a production server?**
+Always preview with `--dry-run` first. Remediation scripts back up every modified file (`.mb.bak.<timestamp>`) and only change directives that differ from the expected value. SSH restarts are handled automatically.
 
-**3. 支持哪些发行版？**
-任何带 Bash 4+ 的 Debian/Ubuntu 或 RHEL 系（CentOS、Rocky、Alma、Fedora）Linux。防火墙检查优先使用 ufw，回退到 iptables。
+**3. Which distributions are supported?**
+Any Debian/Ubuntu or RHEL-family (CentOS, Rocky, Alma, Fedora) Linux with Bash 4+. Firewall checks prefer ufw, falling back to iptables.
 
-**4. 与直接运行 Lynis 有什么区别？**
-Lynis 只是其中一个模块。本工具还做日志分析、容器 CVE 扫描、基线漂移检测，并且——关键在于——为每条发现输出具体修复命令，让你一步完成修复，而不是读完报告再自己查命令。
+**4. How is this different from running Lynis directly?**
+Lynis is just one module. This tool also does log analysis, container CVE scanning, and baseline drift detection — and crucially, outputs specific remediation commands for each finding, so you can fix issues in one step instead of reading a report and then looking up commands yourself.
 
-**5. 基线存在哪里，为什么？**
-存在 `/etc/mb-backup/baseline.yaml`，与 vps-bootstrap 的备份目录一致。这样所有 mb 套件状态都在一个可预测的位置，且能在包升级后保留。
-
----
-
-## 文档
-
-- [审计指南](docs/audit-guide.md) — 如何运行审计并解读报告
-- [CIS Benchmark](docs/cis-benchmark.md) — 检查了哪些控制项及原因
-- [CIS v14.0 映射](docs/cis-v14.0-mapping.md) — 完整的 CIS v14.0 控制项→审计规则→修复脚本映射及评分方法说明
-- [漂移检测](docs/drift-detection.md) — 漂移检测的工作原理与意义
-- [CrowdSec 审计](docs/crowdsec-audit.md) — CrowdSec 部署与安全配置审计
-- [Docker 审计](docs/docker-audit.md) — Docker 安全审计（CIS Docker Benchmark v1.6.0）
-- [自定义规则](docs/custom-rules.md) — 如何编写自定义审计规则
+**5. Where is the baseline stored, and why?**
+In `/etc/mb-backup/baseline.yaml`, consistent with vps-bootstrap's backup directory. This keeps all mb suite state in one predictable location that persists across package upgrades.
 
 ---
 
-## 相关仓库
+## Documentation
 
-- [0x10debug/vps-bootstrap](https://github.com/0x10debug/vps-bootstrap) — VPS 初始加固与配置
-- [0x10debug/monitor-stack](https://github.com/0x10debug/monitor-stack) — 监控与告警栈
+- [Audit Guide](docs/audit-guide.md) — How to run audits and interpret reports
+- [CIS Benchmark](docs/cis-benchmark.md) — Which controls are checked and why
+- [CIS v14.0 Mapping](docs/cis-v14.0-mapping.md) — Complete CIS v14.0 control→audit rule→remediation script mapping and scoring methodology
+- [Drift Detection](docs/drift-detection.md) — How drift detection works and why it matters
+- [CrowdSec Audit](docs/crowdsec-audit.md) — CrowdSec deployment and security configuration audit
+- [Docker Audit](docs/docker-audit.md) — Docker security audit (CIS Docker Benchmark v1.6.0)
+- [Custom Rules](docs/custom-rules.md) — How to write custom audit rules
 
 ---
 
-## 许可证
+## Related Repositories
 
-MIT — 见 [LICENSE](LICENSE)。Copyright (c) 2026 [0x10debug](https://github.com/0x10debug)。
+- [0x10debug/vps-bootstrap](https://github.com/0x10debug/vps-bootstrap) — VPS initial hardening and configuration
+- [0x10debug/monitor-stack](https://github.com/0x10debug/monitor-stack) — Monitoring and alerting stack
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE). Copyright (c) 2026 [0x10debug](https://github.com/0x10debug).

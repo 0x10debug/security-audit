@@ -1,185 +1,185 @@
 # CrowdSec Audit
 
-`modules/crowdsec-audit.sh` — 只读审计 CrowdSec 部署状态与安全配置。
+`modules/crowdsec-audit.sh` — Read-only audit of CrowdSec deployment status and security configuration.
 
-## 审计目标
+## Audit Objectives
 
-CrowdSec 是一个协作式入侵防御系统：通过采集日志、运行场景（scenario）检测攻击行为、并通过 bouncer 执行封禁决策，同时将威胁情报贡献到社区 API（CAPI）。任何一个环节缺失或配置错误都会让防护形同虚设。
+CrowdSec is a collaborative intrusion prevention system: it collects logs, runs scenarios to detect attack behavior, and executes ban decisions through bouncers, while contributing threat intelligence to the community API (CAPI). Any missing or misconfigured component renders the protection ineffective.
 
-本模块对已安装的 CrowdSec 实例做全面只读体检，覆盖从安装到威胁情报的完整链路，输出 TXT + JSON 双报告与 PASS/FAIL/WARN/SKIP 摘要计数。模块不修改任何配置。
+This module performs a comprehensive read-only health check on the installed CrowdSec instance, covering the complete chain from installation to threat intelligence, and outputs both TXT + JSON reports with PASS/FAIL/WARN/SKIP summary counts. The module does not modify any configuration.
 
-## 检查项详解
+## Check Items Detail
 
-### 安装与服务状态
+### Installation and service status
 
-| 检查项 | 说明 |
+| Check Item | Description |
 |---|---|
-| `installation` | CrowdSec 是否安装（`cscli version`）。未安装直接 FAIL。 |
-| `service` | `crowdsec` systemd 服务是否 active + enabled。 |
-| `bouncer_service` | 是否存在 `crowdsec-bouncer-*` 服务且全部 active。无 bouncer → WARN。 |
-| `database_backend` | 数据库后端类型（SQLite / MySQL / PostgreSQL），通过 `cscli config show` 或 `config.yaml` 推断。 |
+| `installation` | Whether CrowdSec is installed (`cscli version`). Not installed → FAIL. |
+| `service` | Whether the `crowdsec` systemd service is active + enabled. |
+| `bouncer_service` | Whether `crowdsec-bouncer-*` services exist and are all active. No bouncer → WARN. |
+| `database_backend` | Database backend type (SQLite / MySQL / PostgreSQL), inferred via `cscli config show` or `config.yaml`. |
 
-### 采集源（acquisition）
+### Acquisition sources
 
-| 检查项 | 说明 |
+| Check Item | Description |
 |---|---|
-| `acquisition_file` | `/etc/crowdsec/acquis.yaml` 是否存在且可读。 |
-| `acquisition_sources` | 枚举已配置的日志源类型（file / journalctl / docker）及数量。 |
-| `critical_sources` | 检查关键日志源是否覆盖：SSH、auth.log、syslog、nginx、apache。缺失 → WARN。 |
-| `docker_acquisition` | Docker 已安装时，检查容器日志采集是否配置。 |
+| `acquisition_file` | Whether `/etc/crowdsec/acquis.yaml` exists and is readable. |
+| `acquisition_sources` | Enumerate configured log source types (file / journalctl / docker) and their counts. |
+| `critical_sources` | Check whether critical log sources are covered: SSH, auth.log, syslog, nginx, apache. Missing → WARN. |
+| `docker_acquisition` | When Docker is installed, check whether container log collection is configured. |
 
-### 场景（scenarios）
+### Scenarios
 
-| 检查项 | 说明 |
+| Check Item | Description |
 |---|---|
-| `scenarios_installed` | 已安装场景总数（`cscli scenarios list`）。零场景 → FAIL。 |
-| `key_scenarios` | 关键场景是否启用：`ssh-bf`、`http-bf`、`crawl`、`scan`。缺失 → WARN。 |
-| `custom_scenarios` | 检测非 `crowdsecurity/` 命名空间的自定义场景，提示审查。 |
-| `scenario_updates` | Hub 更新状态，提示定期 `cscli hub update`。 |
+| `scenarios_installed` | Total number of installed scenarios (`cscli scenarios list`). Zero scenarios → FAIL. |
+| `key_scenarios` | Whether key scenarios are enabled: `ssh-bf`, `http-bf`, `crawl`, `scan`. Missing → WARN. |
+| `custom_scenarios` | Detect custom scenarios outside the `crowdsecurity/` namespace, prompt for review. |
+| `scenario_updates` | Hub update status, prompt to regularly run `cscli hub update`. |
 
-### Bouncer 配置
+### Bouncer configuration
 
-| 检查项 | 说明 |
+| Check Item | Description |
 |---|---|
-| `bouncers_list` | 已注册 bouncer 数量（`cscli bouncers list`）。零 → FAIL。 |
-| `bouncer_types` | 识别 bouncer 类型（iptables / nginx / cfwall / appsec）。 |
-| `bouncer_decisions` | bouncer 是否处于 active 状态并在应用决策。 |
+| `bouncers_list` | Number of registered bouncers (`cscli bouncers list`). Zero → FAIL. |
+| `bouncer_types` | Identify bouncer types (iptables / nginx / cfwall / appsec). |
+| `bouncer_decisions` | Whether bouncers are active and applying decisions. |
 
-### 决策与告警
+### Decisions and alerts
 
-| 检查项 | 说明 |
+| Check Item | Description |
 |---|---|
-| `active_decisions` | 当前活跃决策数量（`cscli decisions list`）。 |
-| `recent_alerts` | 最近告警数量（`cscli alerts list`）。 |
-| `banned_ips` | 当前被封禁 IP 列表（提取 IPv4 地址，取前 5 个样本）。 |
-| `whitelist` | 白名单配置是否存在，降低误封风险。无白名单 → WARN。 |
+| `active_decisions` | Current number of active decisions (`cscli decisions list`). |
+| `recent_alerts` | Number of recent alerts (`cscli alerts list`). |
+| `banned_ips` | Current list of banned IPs (extract IPv4 addresses, take first 5 samples). |
+| `whitelist` | Whether a whitelist configuration exists to reduce false ban risk. No whitelist → WARN. |
 
-### 威胁情报
+### Threat intelligence
 
-| 检查项 | 说明 |
+| Check Item | Description |
 |---|---|
-| `capi_status` | CAPI（CrowdSec Central API）注册与推送状态（`cscli metrics`）。未注册 → WARN。 |
-| `community_ti` | 社区威胁情报订阅是否活跃。 |
-| `local_blocklist` | 手动添加的本地封禁决策数量。 |
+| `capi_status` | CAPI (CrowdSec Central API) registration and push status (`cscli metrics`). Not registered → WARN. |
+| `community_ti` | Whether the community threat intelligence subscription is active. |
+| `local_blocklist` | Number of manually added local ban decisions. |
 
-### 安全配置
+### Security configuration
 
-| 检查项 | 说明 |
+| Check Item | Description |
 |---|---|
-| `api_port_exposure` | LAPI 端口（默认 8080）是否绑定到 `0.0.0.0`（公网暴露 → FAIL）。 |
-| `lapi_auth` | LAPI bouncer 认证是否配置（bouncer token 存在）。 |
-| `config_permissions` | 配置文件权限，特别是 `*_credentials.yaml` 不可被其他用户读取。 |
-| `bouncer_token_security` | bouncer 配置文件（`bouncer-*.yaml`）不可被其他用户读取。 |
+| `api_port_exposure` | Whether the LAPI port (default 8080) is bound to `0.0.0.0` (public exposure → FAIL). |
+| `lapi_auth` | Whether LAPI bouncer authentication is configured (bouncer token exists). |
+| `config_permissions` | Configuration file permissions, especially `*_credentials.yaml` must not be readable by other users. |
+| `bouncer_token_security` | Bouncer configuration files (`bouncer-*.yaml`) must not be readable by other users. |
 
-## 输出
+## Output
 
-- **TXT 报告**：`/var/log/crowdsec-audit/crowdsec-audit-latest.txt`
-- **JSON 报告**：`/var/log/crowdsec-audit/crowdsec-audit-latest.json`
-- 报告同时复制到 `/var/log/mb-audit/reports/` 便于统一访问。
-- 摘要：PASS / FAIL / WARN / SKIP 计数。
-- 管道分隔的 findings（`STATUS|SEVERITY|MODULE|CHECK|MESSAGE|FIX`）供标准报告生成器消费。
+- **TXT report**: `/var/log/crowdsec-audit/crowdsec-audit-latest.txt`
+- **JSON report**: `/var/log/crowdsec-audit/crowdsec-audit-latest.json`
+- Reports are also copied to `/var/log/mb-audit/reports/` for unified access.
+- Summary: PASS / FAIL / WARN / SKIP counts.
+- Pipe-delimited findings (`STATUS|SEVERITY|MODULE|CHECK|MESSAGE|FIX`) for consumption by the standard report generator.
 
-## 运行
+## Usage
 
 ```bash
-# 单独运行 CrowdSec 审计模块
+# Run the CrowdSec audit module standalone
 sudo mb audit run --module crowdsec
 
-# 与其他模块一起运行
+# Run with other modules
 sudo mb audit run --module cis-benchmark,crowdsec,log-audit
 
-# 直接执行脚本
+# Execute the script directly
 sudo modules/crowdsec-audit.sh
 ```
 
-## 常见问题与修复建议
+## Common Issues and Remediation
 
-### CrowdSec 未安装
+### CrowdSec not installed
 
 ```
 FAIL | high | installation | CrowdSec (cscli) is not installed
 ```
-修复：`sudo apt-get install -y crowdsec`（Debian/Ubuntu）或参考 [CrowdSec 安装文档](https://docs.crowdsec.net/getting_started/installation/)。
+Remediation: `sudo apt-get install -y crowdsec` (Debian/Ubuntu) or refer to the [CrowdSec installation documentation](https://docs.crowdsec.net/getting_started/installation/).
 
-### crowdsec 服务未运行
+### crowdsec service not running
 
 ```
 FAIL | high | service | crowdsec service is 'inactive'
 ```
-修复：`sudo systemctl start crowdsec && sudo systemctl enable crowdsec`
+Remediation: `sudo systemctl start crowdsec && sudo systemctl enable crowdsec`
 
-### 无 bouncer 注册
+### No bouncer registered
 
 ```
 FAIL | high | bouncers_list | No bouncers registered
 ```
-CrowdSec 检测到攻击但无 bouncer 执行封禁，等于只报警不阻断。修复：
+CrowdSec detects attacks but without a bouncer to execute bans, it only alerts without blocking. Remediation:
 ```bash
-sudo cscli bouncers install iptables   # 系统防火墙 bouncer
+sudo cscli bouncers install iptables   # System firewall bouncer
 sudo cscli bouncers install nginx      # Nginx bouncer
 sudo cscli bouncers install cfwall     # Cloudflare bouncer
 ```
 
-### 关键场景缺失
+### Key scenarios missing
 
 ```
 WARN | high | key_scenarios | Missing key scenario(s): ssh-bf
 ```
-修复：`sudo cscli scenarios install crowdsecurity/ssh-bf`（或对应 collection）。
+Remediation: `sudo cscli scenarios install crowdsecurity/ssh-bf` (or the corresponding collection).
 
-### LAPI 端口公网暴露
+### LAPI port publicly exposed
 
 ```
 FAIL | high | api_port_exposure | LAPI port 8080 is bound to all interfaces
 ```
-这是高危项：LAPI 暴露到公网意味着任何人都能查询/操作你的 CrowdSec。修复：
+This is a high-risk item: exposing LAPI to the public network means anyone can query/manipulate your CrowdSec. Remediation:
 ```bash
 sudo sed -i 's/listen_uri:.*/listen_uri: 127.0.0.1:8080/' /etc/crowdsec/config.yaml
 sudo systemctl restart crowdsec
 ```
 
-### 凭证文件权限过宽
+### Credential file permissions too permissive
 
 ```
 FAIL | high | config_permissions_local_api_credentials.yaml | world-readable
 ```
-修复：`sudo chmod 600 /etc/crowdsec/local_api_credentials.yaml`
+Remediation: `sudo chmod 600 /etc/crowdsec/local_api_credentials.yaml`
 
-### CAPI 未注册
+### CAPI not registered
 
 ```
 WARN | high | capi_status | CAPI registration not detected
 ```
-未注册 CAPI 意味着你既不贡献也不获取社区威胁情报。修复：
+Not registering with CAPI means you neither contribute to nor receive community threat intelligence. Remediation:
 ```bash
 sudo cscli api register --email <your-email>
 ```
 
-### 无白名单配置
+### No whitelist configuration
 
 ```
 WARN | medium | whitelist | No whitelist configuration found
 ```
-无白名单可能导致合法 IP 被场景误封。建议为可信 IP（如管理出口、CI runner）配置白名单，参见 [CrowdSec whitelist 文档](https://docs.crowdsec.net/whitelist/create/)。
+Without a whitelist, legitimate IPs may be falsely banned by scenarios. It is recommended to configure a whitelist for trusted IPs (e.g., admin egress, CI runners), see the [CrowdSec whitelist documentation](https://docs.crowdsec.net/whitelist/create/).
 
-## 与 vps-bootstrap crowdsec 模块的关系
+## Relationship with vps-bootstrap crowdsec module
 
-[vps-bootstrap](https://github.com/0x10debug/vps-bootstrap) 的 crowdsec 模块负责**初始安装与配置**：安装 CrowdSec 主程序、注册默认 acquisition、安装基础场景与 bouncer、注册 CAPI。
+The [vps-bootstrap](https://github.com/0x10debug/vps-bootstrap) crowdsec module is responsible for **initial installation and configuration**: installing the CrowdSec main program, registering default acquisition, installing base scenarios and bouncers, and registering with CAPI.
 
-本模块负责**持续审计**：验证 vps-bootstrap 部署的 CrowdSec 是否仍然健康运行、场景是否过期、bouncer 是否存活、安全配置是否被后续操作破坏。两者形成"部署 → 验证"闭环：
+This module is responsible for **continuous auditing**: verifying that the CrowdSec deployed by vps-bootstrap is still running healthily, whether scenarios are outdated, whether bouncers are alive, and whether security configuration has been disrupted by subsequent operations. Together they form a "deploy → verify" closed loop:
 
-1. vps-bootstrap 部署 CrowdSec
-2. `mb audit run --module crowdsec` 验证部署状态
-3. 漂移检测（`mb audit drift`）捕获后续配置变化
-4. 修复脚本或手动干预后重新审计确认
+1. vps-bootstrap deploys CrowdSec
+2. `mb audit run --module crowdsec` verifies the deployment status
+3. Drift detection (`mb audit drift`) captures subsequent configuration changes
+4. After remediation scripts or manual intervention, re-audit to confirm
 
-## 与 monitor-stack CrowdSec 监控的关系
+## Relationship with monitor-stack CrowdSec monitoring
 
-[monitor-stack](https://github.com/0x10debug/monitor-stack) 提供运行时监控：CrowdSec 服务存活、bouncer 状态、决策速率、告警趋势等指标通过 Prometheus 采集并在 Grafana 展示，异常时触发告警。
+[monitor-stack](https://github.com/0x10debug/monitor-stack) provides runtime monitoring: CrowdSec service liveness, bouncer status, decision rate, alert trends and other metrics are collected via Prometheus and displayed in Grafana, triggering alerts when anomalies occur.
 
-本模块提供**深度配置审计**：监控栈回答"CrowdSec 现在是否在运行"，本模块回答"CrowdSec 的配置是否安全且完整"。两者互补：
+This module provides **deep configuration auditing**: the monitoring stack answers "is CrowdSec running right now", while this module answers "is CrowdSec's configuration secure and complete". They complement each other:
 
-- monitor-stack：实时指标 + 告警（运行态）
-- crowdsec-audit：周期性配置与覆盖度审计（配置态）
+- monitor-stack: real-time metrics + alerts (runtime state)
+- crowdsec-audit: periodic configuration and coverage audit (configuration state)
 
-建议将 `mb audit run --module crowdsec` 纳入每日定时审计（`mb audit schedule --daily`），与 monitor-stack 的实时告警形成纵深防御。
+It is recommended to include `mb audit run --module crowdsec` in the daily scheduled audit (`mb audit schedule --daily`), forming defense-in-depth with monitor-stack's real-time alerts.
